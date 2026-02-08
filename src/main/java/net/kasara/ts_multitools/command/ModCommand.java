@@ -5,6 +5,8 @@ import net.fabricmc.fabric.api.command.v2.CommandRegistrationCallback;
 import net.kasara.tokorotenslime.api.TokorotenSlimeAPI;
 import net.kasara.ts_multitools.server.SlimeUseCountManager;
 import net.kasara.ts_multitools.TSMultitools;
+import net.minecraft.command.DefaultPermissions;
+import net.minecraft.command.permission.PermissionCheck;
 import net.minecraft.server.command.CommandManager;
 import net.minecraft.server.network.ServerPlayerEntity;
 import net.minecraft.text.Text;
@@ -23,7 +25,9 @@ public class ModCommand {
             // "slimecount" コマンドのルート定義
             dispatcher.register(
                     CommandManager.literal("slimecount")
-                            .requires(source -> source.hasPermissionLevel(2))
+                            .requires(CommandManager.requirePermissionLevel(
+                                    new PermissionCheck.Require(DefaultPermissions.GAMEMASTERS)
+                            ))
 
                             // "reset" サブコマンド
                             .then(CommandManager.literal("reset")

@@ -33,6 +33,7 @@ import net.minecraft.text.Text;
 import net.minecraft.util.*;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.World;
+import org.jetbrains.annotations.NotNull;
 
 import java.util.List;
 import java.util.function.Consumer;
@@ -228,7 +229,7 @@ public class SlimeItem  extends BowItem {
      * - Unbreaking, Mending, Infinity は除外。
      */
     @Override
-    public boolean canBeEnchantedWith(ItemStack stack, RegistryEntry<Enchantment> enchantment, EnchantingContext context) {
+    public boolean canBeEnchantedWith(@NotNull ItemStack stack, @NotNull RegistryEntry<Enchantment> enchantment, @NotNull EnchantingContext context) {
         if (!super.canBeEnchantedWith(stack, enchantment, context)) return false;
 
         // 除外するエンチャント（耐久・修繕・無限）

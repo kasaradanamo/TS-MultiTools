@@ -27,7 +27,7 @@ public class ModClientEvents {
     public static void registerEvents() {
         // ブロック攻撃時に呼ばれる処理
         AttackBlockCallback.EVENT.register((player, world, hand, pos, direction) -> {
-            if (player == null || !world.isClient()) return ActionResult.PASS;
+            if (!world.isClient()) return ActionResult.PASS;
 
             // ブロック攻撃に応じてスライムの状態を変更
             SlimeStateClientHandler.onAttackBlock(player, world, hand, pos);
