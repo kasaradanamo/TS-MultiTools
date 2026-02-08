@@ -1,0 +1,16 @@
+{
+	"required": true,
+	"package": "net.kasara.ts_multitools.mixin",
+	"compatibilityLevel": "JAVA_21",
+	"mixins": [
+		"ItemStackMixin",
+		"EnchantmentHelperMixin",
+        "MixinEntityEquipmentUpdateS2CPacket"
+	],
+	"injectors": {
+		"defaultRequire": 1
+	},
+	"overwrites": {
+		"requireAnnotations": true
+	}
+}
