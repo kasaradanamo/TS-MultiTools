@@ -21,7 +21,7 @@ import java.util.UUID;
  * 別で保存してるデータを差し込んだSLIMEに偽造する
  */
 @Mixin(EntityEquipmentUpdateS2CPacket.class)
-public class MixinEntityEquipmentUpdateS2CPacket {
+public class EntityEquipmentUpdateS2CPacketMixin {
 
     /**
      * EntityEquipmentUpdateS2CPacketのコンストラクタに対して後処理を注入
