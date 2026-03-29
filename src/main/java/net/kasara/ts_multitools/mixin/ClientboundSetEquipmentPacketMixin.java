@@ -21,7 +21,7 @@ import java.util.UUID;
  * 別で保存してるデータを差し込んだSLIMEに偽造する
  */
 @Mixin(ClientboundSetEquipmentPacket.class)
-public class MixinClientboundSetEquipmentPacket {
+public class ClientboundSetEquipmentPacketMixin {
 
     /**
      * EntityEquipmentUpdateS2CPacketのコンストラクタに対して後処理を注入
