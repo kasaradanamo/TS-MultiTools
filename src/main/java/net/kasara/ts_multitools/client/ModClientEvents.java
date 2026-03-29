@@ -7,7 +7,7 @@ import net.fabricmc.fabric.api.event.player.AttackBlockCallback;
 import net.kasara.tokorotenslime.api.TokorotenSlimeAPI;
 import net.kasara.ts_multitools.TSMultitools;
 import net.kasara.ts_multitools.item.ModItems;
-import net.minecraft.world.InteractionResult;
+import net.minecraft.util.ActionResult;
 
 /**
  * クライアントのイベントクラス
@@ -21,14 +21,14 @@ public class ModClientEvents {
     public static void registerEvents() {
 
         // ブロック攻撃時に呼ばれる処理
-        AttackBlockCallback.EVENT.register((player, level, hand, pos, direction) -> {
-            if (!level.isClientSide() || player.getItemInHand(hand).getItem() != ModItems.SLIME)
-                return InteractionResult.PASS;
+        AttackBlockCallback.EVENT.register((player, world, hand, pos, direction) -> {
+            if (!world.isClient() || player.getStackInHand(hand).getItem() != ModItems.SLIME)
+                return ActionResult.PASS;
 
             // ブロック攻撃に応じてスライムの状態を変更
-            SlimeStateClientHandler.onAttackBlock(player, level, hand, pos);
+            SlimeStateClientHandler.onAttackBlock(player, world, hand, pos);
 
-            return InteractionResult.PASS;
+            return ActionResult.PASS;
         });
 
         // 毎Tick呼ばれる処理（クライアント専用）

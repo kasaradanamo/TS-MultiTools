@@ -1,13 +1,13 @@
 package net.kasara.ts_multitools.item;
 
-import net.kasara.ts_multitools.util.ModTags;
 import net.kasara.ts_multitools.server.ToolRightClickHandler;
-import net.minecraft.world.InteractionResult;
-import net.minecraft.world.item.Item;
-import net.minecraft.world.item.ToolMaterial;
-import net.minecraft.world.item.context.UseOnContext;
+import net.kasara.ts_multitools.util.ModTags;
+import net.minecraft.item.Item;
+import net.minecraft.item.ItemUsageContext;
+import net.minecraft.item.ToolMaterial;
+import net.minecraft.util.ActionResult;
 
-import static net.kasara.ts_multitools.util.MultiToolUtil.applyMultiToolProperties;
+import static net.kasara.ts_multitools.util.MultiToolUtil.applyMultiToolSettings;
 
 /**
  * マルチツールアイテム
@@ -15,10 +15,10 @@ import static net.kasara.ts_multitools.util.MultiToolUtil.applyMultiToolProperti
  */
 public class MultitoolItem extends Item {
 
-    public MultitoolItem(ToolMaterial material, Properties pros) {
-        super(applyMultiToolProperties(
+    public MultitoolItem(ToolMaterial material, Settings settings) {
+        super(applyMultiToolSettings(
                 material,
-                pros.stacksTo(1),               // スタック不可
+                settings.maxCount(1),               // スタック不可
                 ModTags.Blocks.MULTITOOL_MINEABLE,  // 採掘できるブロックタグ
                 3,                                  // 攻撃力 (バニラ剣と同じ)
                 -2.4F                               // 攻撃速度（バニラ剣と同じ）
@@ -29,8 +29,8 @@ public class MultitoolItem extends Item {
      * ブロックに向かって右クリックしたときの処理
      */
     @Override
-    public InteractionResult useOn(UseOnContext context) {
+    public ActionResult useOnBlock(ItemUsageContext context) {
         return ToolRightClickHandler.handleRightClick(context) != ToolRightClickHandler.ToolAction.NONE
-                ? InteractionResult.SUCCESS : InteractionResult.PASS;
+                ? ActionResult.SUCCESS : ActionResult.PASS;
     }
 }

@@ -3,30 +3,30 @@ package net.kasara.ts_multitools.network.packet.s2c;
 import net.fabricmc.fabric.api.networking.v1.ServerPlayNetworking;
 import net.kasara.ts_multitools.TSMultitools;
 import net.kasara.ts_multitools.client.data.SlimeUseCountClientCache;
-import net.minecraft.network.RegistryFriendlyByteBuf;
-import net.minecraft.network.codec.ByteBufCodecs;
-import net.minecraft.network.codec.StreamCodec;
-import net.minecraft.network.protocol.common.custom.CustomPacketPayload;
-import net.minecraft.resources.Identifier;
-import net.minecraft.server.level.ServerPlayer;
+import net.minecraft.network.RegistryByteBuf;
+import net.minecraft.network.codec.PacketCodec;
+import net.minecraft.network.codec.PacketCodecs;
+import net.minecraft.network.packet.CustomPayload;
+import net.minecraft.server.network.ServerPlayerEntity;
+import net.minecraft.util.Identifier;
 
 /**
  * プレイヤーのSlimeItem使用回数（SLIME_USE_COUNT）をクライアントに送信する
  */
-public record SlimeUseCountS2CPacket(int slimeCount) implements CustomPacketPayload {
+public record SlimeUseCountS2CPacket(int slimeCount) implements CustomPayload {
 
-    public static final CustomPacketPayload.Type<SlimeUseCountS2CPacket> ID =
-            new Type<>(Identifier.fromNamespaceAndPath(TSMultitools.MOD_ID, "slime_use_count"));
+    public static final Id<SlimeUseCountS2CPacket> ID =
+            new Id<>(Identifier.of(TSMultitools.MOD_ID, "slime_use_count"));
 
-    public static final StreamCodec<RegistryFriendlyByteBuf, SlimeUseCountS2CPacket> CODEC =
-            StreamCodec.composite(ByteBufCodecs.INT, SlimeUseCountS2CPacket::slimeCount, SlimeUseCountS2CPacket::new);
+    public static final PacketCodec<RegistryByteBuf, SlimeUseCountS2CPacket> CODEC =
+            PacketCodec.tuple(PacketCodecs.INTEGER, SlimeUseCountS2CPacket::slimeCount, SlimeUseCountS2CPacket::new);
 
     @Override
-    public CustomPacketPayload.Type<? extends CustomPacketPayload> type() {
+    public Id<? extends CustomPayload> getId() {
         return ID;
     }
 
-    public static void send(ServerPlayer player, int count) {
+    public static void send(ServerPlayerEntity player, int count) {
         ServerPlayNetworking.send(player, new SlimeUseCountS2CPacket(count));
     }
 

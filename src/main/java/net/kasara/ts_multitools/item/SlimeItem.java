@@ -1,66 +1,62 @@
 package net.kasara.ts_multitools.item;
 
 import net.fabricmc.fabric.api.item.v1.EnchantingContext;
-import net.kasara.ts_multitools.client.data.SlimeUseCountClientCache;
 import net.kasara.ts_multitools.client.SlimeStateClientHandler;
+import net.kasara.ts_multitools.client.data.SlimeUseCountClientCache;
 import net.kasara.ts_multitools.component.MiningEnchantLevelComponent;
 import net.kasara.ts_multitools.component.ModComponents;
 import net.kasara.ts_multitools.component.SlimeModeComponent;
 import net.kasara.ts_multitools.entity.SlimeArrowEntity;
 import net.kasara.ts_multitools.server.SlimeUseCountManager;
+import net.kasara.ts_multitools.server.ToolRightClickHandler;
 import net.kasara.ts_multitools.util.ModTags;
 import net.kasara.ts_multitools.util.OffhandTriggerTracker;
-import net.kasara.ts_multitools.server.ToolRightClickHandler;
-import net.minecraft.ChatFormatting;
-import net.minecraft.core.BlockPos;
-import net.minecraft.core.Holder;
-import net.minecraft.core.component.DataComponents;
-import net.minecraft.core.registries.BuiltInRegistries;
-import net.minecraft.network.chat.Component;
-import net.minecraft.network.chat.Style;
-import net.minecraft.resources.Identifier;
-import net.minecraft.server.level.ServerLevel;
-import net.minecraft.sounds.SoundEvents;
-import net.minecraft.sounds.SoundSource;
-import net.minecraft.stats.Stats;
+import net.minecraft.block.BlockState;
+import net.minecraft.component.DataComponentTypes;
+import net.minecraft.component.type.TooltipDisplayComponent;
+import net.minecraft.enchantment.Enchantment;
+import net.minecraft.enchantment.Enchantments;
+import net.minecraft.entity.LivingEntity;
+import net.minecraft.entity.player.PlayerEntity;
+import net.minecraft.entity.projectile.ProjectileEntity;
+import net.minecraft.item.*;
+import net.minecraft.item.tooltip.TooltipType;
+import net.minecraft.registry.Registries;
+import net.minecraft.registry.entry.RegistryEntry;
+import net.minecraft.server.world.ServerWorld;
+import net.minecraft.sound.SoundCategory;
+import net.minecraft.sound.SoundEvents;
+import net.minecraft.stat.Stats;
+import net.minecraft.text.Style;
+import net.minecraft.text.Text;
 import net.minecraft.util.*;
-import net.minecraft.world.InteractionHand;
-import net.minecraft.world.InteractionResult;
-import net.minecraft.world.entity.LivingEntity;
-import net.minecraft.world.entity.player.Player;
-import net.minecraft.world.entity.projectile.Projectile;
-import net.minecraft.world.item.*;
-import net.minecraft.world.item.component.TooltipDisplay;
-import net.minecraft.world.item.context.UseOnContext;
-import net.minecraft.world.item.enchantment.Enchantment;
-import net.minecraft.world.item.enchantment.Enchantments;
-import net.minecraft.world.level.Level;
-import net.minecraft.world.level.block.state.BlockState;
+import net.minecraft.util.math.BlockPos;
+import net.minecraft.world.World;
 
 import java.util.List;
 import java.util.UUID;
 import java.util.function.Consumer;
 
-import static net.kasara.ts_multitools.util.MultiToolUtil.applyMultiToolProperties;
+import static net.kasara.ts_multitools.util.MultiToolUtil.applyMultiToolSettings;
 
 /**
  * スライムアイテム
  */
-public class SlimeItem  extends BowItem {
+public class SlimeItem extends BowItem {
 
-    public SlimeItem(ToolMaterial material, Properties pros) {
-        super(applyMultiToolProperties(
+    public SlimeItem(ToolMaterial material, Settings settings) {
+        super(applyMultiToolSettings(
                 material,
-                pros
-                        .stacksTo(1)        // スタック不可
-                        .fireResistant()         // 耐火
-                        .rarity(Rarity.EPIC)     // レア度：エピック
+                settings
+                        .maxCount(1)            // スタック不可
+                        .fireproof()            // 耐火
+                        .rarity(Rarity.EPIC)    // レア度：エピック
                         .component(ModComponents.SLIME_STATE, "slime")
                         .component(ModComponents.SLIME_MODE, SlimeModeComponent.DEFAULT)
                         .component(ModComponents.MINING_ENCHANT_LEVEL, MiningEnchantLevelComponent.DEFAULT),
-                ModTags.Blocks.SLIME_MINEABLE,    // 採掘できるブロックタグ
-                3,                                // 攻撃力 (バニラ剣と同じ)
-                -2.4F                             // 攻撃速度（バニラ剣と同じ）
+                ModTags.Blocks.SLIME_MINEABLE,  // 採掘できるブロックタグ
+                3,                              // 攻撃力 (バニラ剣と同じ)
+                -2.4F                           // 攻撃速度（バニラ剣と同じ）
         ));
     }
 
@@ -68,9 +64,9 @@ public class SlimeItem  extends BowItem {
      * アイテムスタックができるときにUUIDを付与
      */
     @Override
-    public ItemStack getDefaultInstance() {
-        ItemStack stack = super.getDefaultInstance();
-        if (!stack.has(ModComponents.SLIME_UUID)) {
+    public ItemStack getDefaultStack() {
+        ItemStack stack = super.getDefaultStack();
+        if (!stack.contains(ModComponents.SLIME_UUID)) {
             stack.set(ModComponents.SLIME_UUID, UUID.randomUUID());
         }
         return stack;
@@ -82,97 +78,97 @@ public class SlimeItem  extends BowItem {
      * bow → オフハンドの状態（松明やストレージボックス持ち）に応じて処理を制御
      */
     @Override
-    public InteractionResult useOn(UseOnContext context) {
-        if (!(context.getPlayer() instanceof Player player)
-                || player.totalExperience < 1) return InteractionResult.PASS; // XP不足なら処理しない
+    public ActionResult useOnBlock(ItemUsageContext context) {
+        if (!(context.getPlayer() instanceof PlayerEntity player)
+                || player.totalExperience < 1) return ActionResult.PASS; // XP不足なら処理しない
 
-        ItemStack stack = context.getItemInHand();
+        ItemStack stack = context.getStack();
         SlimeModeComponent mode = stack.get(ModComponents.SLIME_MODE);
 
         // toolモードなら右クリックで特殊アクションを処理(ここでServerPlayerEntityだと動きがつかない)
         if (mode != null && "tool".equals(mode.useMode())) {
             ToolRightClickHandler.ToolAction action = ToolRightClickHandler.handleRightClick(context);
             if (action != ToolRightClickHandler.ToolAction.NONE) {
-                if (player.level().isClientSide()) {
+                if (player.getWorld().isClient())
                     // クライアント側に状態反映
                     SlimeStateClientHandler.applyStateOnBlockUse(stack, action);
-                }
+
                 SlimeUseCountManager.increment(player);    // 使用回数を加算
                 shouldConsumeXP(player);                // XP消費判定
             }
-            return action != ToolRightClickHandler.ToolAction.NONE ? InteractionResult.SUCCESS : InteractionResult.PASS;
+            return action != ToolRightClickHandler.ToolAction.NONE ? ActionResult.SUCCESS : ActionResult.PASS;
         }
 
         // オフハンドの制御（たいまつやストレージ系アイテムなら制限）
-        ItemStack offHandStack = player.getOffhandItem();
-        String id = BuiltInRegistries.ITEM.getKey(offHandStack.getItem()).toString();
+        ItemStack offHandStack = player.getOffHandStack();
+        String id = Registries.ITEM.getId(offHandStack.getItem()).toString();
         boolean forbiddenOffhand = id.contains("torch") || id.contains("storagebox");
 
         // ブロックを狙っていて禁止オフハンドならフラグセット
-        boolean targetingBlock = !context.getLevel().getBlockState(context.getClickedPos()).isAir();
+        boolean targetingBlock = !context.getWorld().getBlockState(context.getBlockPos()).isAir();
         if (targetingBlock && forbiddenOffhand) {
             OffhandTriggerTracker.set(player, true);
-            return InteractionResult.PASS;
+            return ActionResult.PASS;
         }
 
         OffhandTriggerTracker.clear(player);
-        return InteractionResult.PASS;
+        return ActionResult.PASS;
     }
 
     /**
      * アイテム使用開始時の処理（右クリック押しっぱなし）
      */
     @Override
-    public InteractionResult use(Level level, Player player, InteractionHand hand) {
-        if (player.totalExperience < 1) return InteractionResult.FAIL; // XP不足なら発射不可
+    public ActionResult use(World world, PlayerEntity user, Hand hand) {
+        if (user.totalExperience < 1) return ActionResult.FAIL; // XP不足なら発射不可
 
-        ItemStack stack = player.getItemInHand(hand);
+        ItemStack stack = user.getStackInHand(hand);
         SlimeModeComponent mode = stack.get(ModComponents.SLIME_MODE);
 
         // toolモード時は弓動作を無効化
-        if (mode != null && "tool".equals(mode.useMode())) return InteractionResult.FAIL;
+        if (mode != null && "tool".equals(mode.useMode())) return ActionResult.FAIL;
 
         // オフハンドのフラグが立っていた場合はキャンセル
-        if (OffhandTriggerTracker.get(player)) {
-            OffhandTriggerTracker.clear(player);
-            return InteractionResult.FAIL;
+        if (OffhandTriggerTracker.get(user)) {
+            OffhandTriggerTracker.clear(user);
+            return ActionResult.FAIL;
         }
 
-        player.startUsingItem(hand);  // 弓を引く動作開始
-        return InteractionResult.CONSUME;
+        user.setCurrentHand(hand);  // 弓を引く動作開始
+        return ActionResult.CONSUME;
     }
 
     /**
      * 弓の使用終了（離した瞬間）の処理
      */
     @Override
-    public boolean releaseUsing(final ItemStack itemStack, final Level level, final LivingEntity entity, final int remainingTime) {
-        if (!(entity instanceof Player player)) return false;
+    public boolean onStoppedUsing(ItemStack stack, World world, LivingEntity user, int remainingUseTicks) {
+        if (!(user instanceof PlayerEntity player)) return false;
 
         // 引いた時間から弓のチャージ進行度を計算
-        int useTime = this.getUseDuration(itemStack, player) - remainingTime;
-        float pullProgress = getPowerForTime(useTime);
+        int useTime = this.getMaxUseTime(stack, user) - remainingUseTicks;
+        float pullProgress = getPullProgress(useTime);
         if (pullProgress < 0.1) return false;   // 引き不足なら発射しない
 
         // ダミー矢を作成（実際の矢アイテム不要）
         ItemStack dummyArrow = new ItemStack(Items.ARROW);
-        dummyArrow.set(DataComponents.INTANGIBLE_PROJECTILE, Unit.INSTANCE);
+        dummyArrow.set(DataComponentTypes.INTANGIBLE_PROJECTILE, Unit.INSTANCE);
         List<ItemStack> projectiles = List.of(dummyArrow);
 
         // サーバー側で矢を発射
-        if (level instanceof ServerLevel serverLevel) {
-            this.shoot(serverLevel, player, player.getUsedItemHand(), itemStack, projectiles,
+        if (world instanceof ServerWorld serverWorld) {
+            this.shootAll(serverWorld, player, player.getActiveHand(), stack, projectiles,
                     pullProgress * 3.0F, 1.0F, pullProgress == 1.0F, null);
         }
 
         // 発射音を再生
-        level.playSound(null, player.getX(), player.getY(), player.getZ(),
-                SoundEvents.ARROW_SHOOT, SoundSource.PLAYERS,
-                1.0F, 1.0F / (level.getRandom().nextFloat() * 0.4F + 1.2F) + pullProgress * 0.5F);
+        world.playSound(null, player.getX(), player.getY(), player.getZ(),
+                SoundEvents.ENTITY_ARROW_SHOOT, SoundCategory.PLAYERS,
+                1.0F, 1.0F / (world.getRandom().nextFloat() * 0.4F + 1.2F) + pullProgress * 0.5F);
 
-        SlimeUseCountManager.increment(player);        // 使用回数加算
-        shouldConsumeXP(player);                       // XP消費判定
-        player.awardStat(Stats.ITEM_USED.get(this));   // 使用統計更新
+        SlimeUseCountManager.increment(player);                        // 使用回数加算
+        shouldConsumeXP(player);                                       // XP消費判定
+        player.incrementStat(Stats.USED.getOrCreateStat(this));   // 使用統計更新
         return true;
     }
 
@@ -180,9 +176,9 @@ public class SlimeItem  extends BowItem {
      * カスタム矢エンティティを生成
      */
     @Override
-    protected Projectile createProjectile(Level level, LivingEntity shooter, ItemStack weapon, ItemStack projectile, boolean isCrit) {
-        SlimeArrowEntity arrow = new SlimeArrowEntity(level, shooter, projectile, weapon);
-        arrow.setCritArrow(isCrit); // フルチャージならクリティカル
+    protected ProjectileEntity createArrowEntity(World world, LivingEntity shooter, ItemStack weaponStack, ItemStack projectileStack, boolean critical) {
+        SlimeArrowEntity arrow = new SlimeArrowEntity(world, shooter, projectileStack, weaponStack);
+        arrow.setCritical(critical);    // フルチャージならクリティカル
         return arrow;
     }
 
@@ -190,22 +186,22 @@ public class SlimeItem  extends BowItem {
      * ブロック破壊後の処理
      */
     @Override
-    public boolean mineBlock(ItemStack itemStack, Level level, BlockState state, BlockPos pos, LivingEntity owner) {
-        if (!(owner instanceof Player player)) return false;
-        SlimeUseCountManager.increment(player); // 使用回数加算
+    public boolean postMine(ItemStack stack, World world, BlockState state, BlockPos pos, LivingEntity miner) {
+        if (!(miner instanceof PlayerEntity player)) return false;
+        SlimeUseCountManager.increment(player);    // 使用回数加算
         shouldConsumeXP(player);                // XP消費判定
-        return super.mineBlock(itemStack, level, state, pos, owner);
+        return super.postMine(stack, world, state, pos, miner);
     }
 
     /**
      * 攻撃ヒット後の処理
      */
     @Override
-    public void postHurtEnemy(ItemStack itemStack, LivingEntity mob, LivingEntity attacker) {
-        if (attacker instanceof Player player) {
+    public void postHit(ItemStack stack, LivingEntity target, LivingEntity attacker) {
+        if (attacker instanceof PlayerEntity player) {
             SlimeUseCountManager.increment(player);    // 使用回数加算
             shouldConsumeXP(player);                   // XP消費判定
-            super.postHurtEnemy(itemStack, mob, attacker);
+            super.postHit(stack, target, attacker);
         }
     }
 
@@ -214,12 +210,12 @@ public class SlimeItem  extends BowItem {
      * - ガラス系ブロックは掘るのが少し早い。
      */
     @Override
-    public float getDestroySpeed(ItemStack itemStack, BlockState state) {
-        Identifier id = BuiltInRegistries.BLOCK.getKey(state.getBlock());
+    public float getMiningSpeed(ItemStack stack, BlockState state) {
+        Identifier id = Registries.BLOCK.getId(state.getBlock());
         if (id.getPath().contains("glass")) {
             return 1.5F;    // ガラス系は少し早めに
         }
-        return super.getDestroySpeed(itemStack, state);
+        return super.getMiningSpeed(stack, state);
     }
 
     /**
@@ -227,12 +223,12 @@ public class SlimeItem  extends BowItem {
      * Unbreaking(耐久), Mending(修繕), Infinity(無限) は除外
      */
     @Override
-    public boolean canBeEnchantedWith(ItemStack stack, Holder<Enchantment> enchantment, EnchantingContext context) {
+    public boolean canBeEnchantedWith(ItemStack stack, RegistryEntry<Enchantment> enchantment, EnchantingContext context) {
         if (!super.canBeEnchantedWith(stack, enchantment, context)) return false;
 
-        return !enchantment.is(Enchantments.UNBREAKING) &&
-                !enchantment.is(Enchantments.MENDING) &&
-                !enchantment.is((Enchantments.INFINITY));
+        return !enchantment.matchesKey(Enchantments.UNBREAKING) &&
+                !enchantment.matchesKey(Enchantments.MENDING) &&
+                !enchantment.matchesKey((Enchantments.INFINITY));
     }
 
     /**
@@ -242,45 +238,45 @@ public class SlimeItem  extends BowItem {
      * 使用モード（bow/tool）
      */
     @Override
-    public void appendHoverText(ItemStack itemStack, Item.TooltipContext context, TooltipDisplay display, Consumer<Component> builder, TooltipFlag tooltipFlag) {
-        super.appendHoverText(itemStack, context, display, builder, tooltipFlag);
+    public void appendTooltip(ItemStack stack, TooltipContext context, TooltipDisplayComponent displayComponent, Consumer<Text> textConsumer, TooltipType type) {
+        super.appendTooltip(stack, context, displayComponent, textConsumer, type);
 
         // 使用回数の表示
-        builder.accept(
-                Component.translatable("tooltip.tokorotenslime.proficiency", SlimeUseCountClientCache.getSlimeUseCount())
+        textConsumer.accept(
+                Text.translatable("tooltip.tokorotenslime.proficiency", SlimeUseCountClientCache.getSlimeUseCount())
         );
 
         // モード情報の表示
-        SlimeModeComponent mode = itemStack.get(ModComponents.SLIME_MODE);
+        SlimeModeComponent mode = stack.get(ModComponents.SLIME_MODE);
         if (mode != null) {
             // マイニングモード表示
-            Component miningText = Component.translatable("mode.tokorotenslime.mining." + mode.miningMode());
-            builder.accept(
-                    Component.translatable("tooltip.tokorotenslime.mining_mode", miningText)
-                            .setStyle(Style.EMPTY.withColor(ChatFormatting.AQUA))
+            Text miningText = Text.translatable("mode.tokorotenslime.mining." + mode.miningMode());
+            textConsumer.accept(
+                    Text.translatable("tooltip.tokorotenslime.mining_mode", miningText)
+                            .setStyle(Style.EMPTY.withColor(Formatting.AQUA))
             );
 
             // 使用モード表示
-            Component modeText = Component.translatable("mode.tokorotenslime.use." + mode.useMode());
-            builder.accept(
-                    Component.translatable("tooltip.tokorotenslime.use_mode", modeText)
-                            .setStyle(Style.EMPTY.withColor(ChatFormatting.GOLD))
+            Text modeText = Text.translatable("mode.tokorotenslime.use." + mode.useMode());
+            textConsumer.accept(
+                    Text.translatable("tooltip.tokorotenslime.use_mode", modeText)
+                            .setStyle(Style.EMPTY.withColor(Formatting.GOLD))
             );
         }
     }
 
     /**
-     * 使用回数に応じて一定確率で XP を消費する
-     * 使用回数が増えるほど XP 消費確率が減少（最小20%）
+     * 使用回数に応じて一定確率で XP を消費する。
+     * - 使用回数が増えるほど XP 消費確率が減少（最小20%）。
      */
-    private void shouldConsumeXP(Player player) {
-        if (player.level().isClientSide()) return; // クライアント側なら何もしない
+    private void shouldConsumeXP(PlayerEntity player) {
+        if (player.getWorld().isClient()) return; // クライアント側なら何もしない
 
         int count = SlimeUseCountManager.get(player);                       // 使用回数を取得
         double probability = Math.max(1.0 - (count / 50000.0) * 0.8, 0.2);  // 使用回数に応じたXP消費率
 
-        boolean consume = player.level().getRandom().nextDouble() < probability;
+        boolean consume = player.getWorld().random.nextDouble() < probability;
 
-        if(consume) player.giveExperiencePoints(-1);                     // 一定確率で経験値消費
+        if(consume) player.addExperience(-1);                               // 一定確率で経験値消費
     }
 }

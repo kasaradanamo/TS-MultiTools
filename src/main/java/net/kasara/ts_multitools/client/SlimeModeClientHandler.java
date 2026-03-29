@@ -2,20 +2,14 @@ package net.kasara.ts_multitools.client;
 
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
+import net.kasara.ts_multitools.client.option.ModKeyBindings;
 import net.kasara.ts_multitools.component.ModComponents;
 import net.kasara.ts_multitools.component.SlimeModeComponent;
 import net.kasara.ts_multitools.item.ModItems;
 import net.kasara.ts_multitools.network.packet.c2s.ToggleSlimeModeC2SPacket;
-import net.kasara.ts_multitools.client.option.ModKeyMappings;
-import net.minecraft.client.Minecraft;
-import net.minecraft.core.Holder;
-import net.minecraft.core.component.DataComponents;
-import net.minecraft.core.registries.Registries;
-import net.minecraft.world.item.ItemStack;
-import net.minecraft.world.item.enchantment.Enchantment;
-import net.minecraft.world.item.enchantment.Enchantments;
-import net.minecraft.world.item.enchantment.ItemEnchantments;
-import net.minecraft.world.level.Level;
+import net.minecraft.client.MinecraftClient;
+import net.minecraft.component.type.ItemEnchantmentsComponent;
+import net.minecraft.item.ItemStack;
 import org.lwjgl.glfw.GLFW;
 
 import java.util.UUID;
@@ -33,18 +27,18 @@ public class SlimeModeClientHandler {
      * モード切替キー入力処理
      * Ctrlキー併用で use_mode、それ以外は mining_mode に切り替える。
      */
-    public static void handleModeToggle(Minecraft minecraft) {
-        boolean isPressed = ModKeyMappings.MODE_TOGGLE.isDown();
+    public static void handleModeToggle(MinecraftClient client) {
+        boolean isPressed = ModKeyBindings.MODE_TOGGLE.isPressed();
 
         if (isPressed && !modeTogglePressed) {
             modeTogglePressed = true;
 
-            ItemStack stack = minecraft.player.getMainHandItem();
+            ItemStack stack = client.player.getMainHandStack();
             if (stack.getItem() != ModItems.SLIME) return;
 
             UUID stackUuid = stack.get(ModComponents.SLIME_UUID);
 
-            boolean ctrlPressed = GLFW.glfwGetKey(minecraft.getWindow().handle(),
+            boolean ctrlPressed = GLFW.glfwGetKey(client.getWindow().getHandle(),
                     GLFW.GLFW_KEY_LEFT_CONTROL) == GLFW.GLFW_PRESS;
 
             ToggleSlimeModeC2SPacket.send(stackUuid, ctrlPressed ? "use_mode" : "mining_mode");
@@ -72,16 +66,13 @@ public class SlimeModeClientHandler {
      * @return "fortune" | "silk_touch" | "default"
      */
     private static String getMiningModeFromEnchantments(ItemStack stack) {
-        Level level = Minecraft.getInstance().level;
+        ItemEnchantmentsComponent enchantments = stack.getEnchantments();
+        if (enchantments == null || enchantments.isEmpty()) return "default";
 
-        ItemEnchantments enchants = stack.get(DataComponents.ENCHANTMENTS);
-        if (enchants == null || enchants.isEmpty()) return "default";
-
-        Holder<Enchantment> fortuneHolder = level.registryAccess().lookupOrThrow(Registries.ENCHANTMENT).getOrThrow(Enchantments.FORTUNE);
-        Holder<Enchantment> silkTouchHolder = level.registryAccess().lookupOrThrow(Registries.ENCHANTMENT).getOrThrow(Enchantments.SILK_TOUCH);
-
-        boolean hasFortune = enchants.getLevel(fortuneHolder) > 0;
-        boolean hasSilkTouch = enchants.getLevel(silkTouchHolder) > 0;
+        boolean hasFortune = enchantments.getEnchantmentEntries().stream()
+                .anyMatch(e -> e.getKey().matchesKey(net.minecraft.enchantment.Enchantments.FORTUNE));
+        boolean hasSilkTouch = enchantments.getEnchantmentEntries().stream()
+                .anyMatch(e -> e.getKey().matchesKey(net.minecraft.enchantment.Enchantments.SILK_TOUCH));
 
         if (hasFortune) return "fortune";
         if (hasSilkTouch) return "silk_touch";

@@ -3,18 +3,20 @@ package net.kasara.ts_multitools.server;
 import net.kasara.ts_multitools.component.ModComponents;
 import net.kasara.ts_multitools.component.SlimeModeComponent;
 import net.kasara.ts_multitools.item.ModItems;
-import net.minecraft.ChatFormatting;
-import net.minecraft.core.Holder;
-import net.minecraft.core.component.DataComponents;
-import net.minecraft.core.registries.Registries;
-import net.minecraft.network.chat.Component;
-import net.minecraft.network.chat.Style;
-import net.minecraft.server.level.ServerPlayer;
-import net.minecraft.world.item.ItemStack;
-import net.minecraft.world.item.enchantment.Enchantment;
-import net.minecraft.world.item.enchantment.Enchantments;
-import net.minecraft.world.item.enchantment.ItemEnchantments;
+import net.minecraft.component.DataComponentTypes;
+import net.minecraft.component.type.ItemEnchantmentsComponent;
+import net.minecraft.enchantment.Enchantment;
+import net.minecraft.enchantment.Enchantments;
+import net.minecraft.item.ItemStack;
+import net.minecraft.registry.Registry;
+import net.minecraft.registry.RegistryKeys;
+import net.minecraft.registry.entry.RegistryEntry;
+import net.minecraft.server.network.ServerPlayerEntity;
+import net.minecraft.text.Style;
+import net.minecraft.text.Text;
+import net.minecraft.util.Formatting;
 
+import java.util.Optional;
 import java.util.UUID;
 
 /**
@@ -28,8 +30,8 @@ public class SlimeModeServerHandler {
     /**
      * SlimeItemの使用モード（弓/ツール）を切り替え
      */
-    public static void handleUseMode(ServerPlayer player) {
-        ItemStack stack = player.getMainHandItem();
+    public static void handleUseMode(ServerPlayerEntity player) {
+        ItemStack stack = player.getMainHandStack();
         SlimeModeComponent comp = stack.get(ModComponents.SLIME_MODE);
         if (comp == null) return;
 
@@ -40,15 +42,15 @@ public class SlimeModeServerHandler {
         stack.set(ModComponents.SLIME_MODE, comp.withUseMode(newUseMode));
 
         // プレイヤーにメッセージを表示
-        Component modeText = Component.translatable("mode.tokorotenslime.use." + newUseMode).setStyle(Style.EMPTY.withColor(ChatFormatting.GOLD));
-        player.sendSystemMessage(Component.translatable("message.tokorotenslime.use_mode", modeText), false);
+        Text modeText = Text.translatable("mode.tokorotenslime.use." + newUseMode).setStyle(Style.EMPTY.withColor(Formatting.GOLD));
+        player.sendMessage(Text.translatable("message.tokorotenslime.use_mode", modeText), false);
     }
 
     /**
      * SlimeItemのマイニングモード（fortune/silk_touch）を切り替え
      */
-    public static void handleMiningMode(ServerPlayer player) {
-        ItemStack stack = player.getMainHandItem();
+    public static void handleMiningMode(ServerPlayerEntity player) {
+        var stack = player.getMainHandStack();
         var comp = stack.get(ModComponents.SLIME_MODE);
         if (comp == null) return;
 
@@ -62,14 +64,28 @@ public class SlimeModeServerHandler {
         // デフォルトならそのまま
         if (newMiningMode.equals("default")) return;
 
-        Holder<Enchantment> fortuneHolder = player.level().registryAccess().lookupOrThrow(Registries.ENCHANTMENT).getOrThrow(Enchantments.FORTUNE);
-        Holder<Enchantment> silkTouchHolder = player.level().registryAccess().lookupOrThrow(Registries.ENCHANTMENT).getOrThrow(Enchantments.SILK_TOUCH);
+        // サーバーのレジストリからエンチャントを取得
+        var registryManager = player.getWorld().getServer().getRegistryManager();
+        Optional<Registry<Enchantment>> enchantmentRegistryOpt =
+                registryManager.getOptional(RegistryKeys.ENCHANTMENT);
+        if (enchantmentRegistryOpt.isEmpty()) return;
+
+        Registry<Enchantment> enchantmentRegistry = enchantmentRegistryOpt.get();
+
+        Optional<RegistryEntry.Reference<Enchantment>> fortuneEntryOpt =
+                enchantmentRegistry.getEntry(Enchantments.FORTUNE.getValue());
+        Optional<RegistryEntry.Reference<Enchantment>> silkEntryOpt =
+                enchantmentRegistry.getEntry(Enchantments.SILK_TOUCH.getValue());
+        if (fortuneEntryOpt.isEmpty() || silkEntryOpt.isEmpty()) return;
+
+        RegistryEntry<Enchantment> fortuneEntry = fortuneEntryOpt.get();
+        RegistryEntry<Enchantment> silkEntry = silkEntryOpt.get();
 
         // 現在のエンチャントを取得
-        ItemEnchantments current = stack.getEnchantments();
+        ItemEnchantmentsComponent current = stack.getOrDefault(DataComponentTypes.ENCHANTMENTS, ItemEnchantmentsComponent.DEFAULT);
 
-        int currentFortune = current.getLevel(fortuneHolder);
-        int currentSilk = current.getLevel(silkTouchHolder);
+        int currentFortune = current.getLevel(fortuneEntry);
+        int currentSilk = current.getLevel(silkEntry);
 
         var miningComp = stack.get(ModComponents.MINING_ENCHANT_LEVEL);
         if (miningComp == null) return;
@@ -89,32 +105,31 @@ public class SlimeModeServerHandler {
         stack.set(ModComponents.MINING_ENCHANT_LEVEL, miningComp);
 
         // エンチャントを再構築（fortune/silk_touchのみ付与）
-        ItemEnchantments.Mutable mutable = new ItemEnchantments.Mutable(current);
-        mutable.removeIf(entry -> entry.equals(fortuneHolder) || entry.equals(silkTouchHolder));
+        ItemEnchantmentsComponent.Builder enchBuilder = new ItemEnchantmentsComponent.Builder(current);
+        enchBuilder.remove(entry -> entry.equals(fortuneEntry) || entry.equals(silkEntry));
         if (newMiningMode.equals("fortune") && miningComp.fortuneLevel() > 0) {
-            mutable.set(fortuneHolder, miningComp.fortuneLevel());
+            enchBuilder.add(fortuneEntry, miningComp.fortuneLevel());
         } else if (newMiningMode.equals("silk_touch") && miningComp.silkTouchLevel() > 0) {
-            mutable.set(silkTouchHolder, miningComp.silkTouchLevel());
+            enchBuilder.add(silkEntry, miningComp.silkTouchLevel());
         }
-        stack.set(DataComponents.ENCHANTMENTS, mutable.toImmutable());
+        stack.set(DataComponentTypes.ENCHANTMENTS, enchBuilder.build());
 
         // モードを更新
         stack.set(ModComponents.SLIME_MODE, comp.withMiningMode(newMiningMode));
 
         // プレイヤーに切替結果を通知
-        Component miningText = Component.translatable("mode.tokorotenslime.mining." + newMiningMode).setStyle(Style.EMPTY.withColor(ChatFormatting.AQUA));
-        player.sendSystemMessage(Component.translatable("message.tokorotenslime.mining_mode", miningText), false);
+        Text miningText = Text.translatable("mode.tokorotenslime.mining." + newMiningMode).setStyle(Style.EMPTY.withColor(Formatting.AQUA));
+        player.sendMessage(Text.translatable("message.tokorotenslime.mining_mode", miningText), false);
     }
 
     /**
      * UUIDで特定したSlimeItemのマイニングモードをインベントリ内で更新
-     *
      * @param stackUuid 対象SlimeItemのUUID
      * @param mode 適用するモード ("fortune"/"silk_touch"/"default")
      * @param player 対象プレイヤー
      */
-    public static void updateMiningModeForInventory(UUID stackUuid, String mode, ServerPlayer player) {
-        for (ItemStack stack : player.getInventory()) {
+    public static void updateMiningModeForInventory(UUID stackUuid, String mode, ServerPlayerEntity player) {
+        for(ItemStack stack : player.getInventory()) {
             if (stack.isEmpty() || stack.getItem() != ModItems.SLIME) continue;
 
             UUID uuidComp = stack.get(ModComponents.SLIME_UUID);
@@ -133,7 +148,7 @@ public class SlimeModeServerHandler {
      * SlimeItemのモード切替や更新処理をまとめて呼び出す
      * C2Sパケットで受信した情報に基づき、用途モード・マイニングモード・個別モードを適用
      */
-    public static void toggleSlimeModeHandle(UUID stackUuid, String mode, ServerPlayer player) {
+    public static void toggleSlimeModeHandle(UUID stackUuid, String mode, ServerPlayerEntity player) {
         switch (mode) {
             case "use_mode":
                 // 使用モード（弓/ツール）切替

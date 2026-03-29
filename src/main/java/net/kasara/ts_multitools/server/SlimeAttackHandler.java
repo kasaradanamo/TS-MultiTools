@@ -1,9 +1,9 @@
 package net.kasara.ts_multitools.server;
 
-import net.kasara.ts_multitools.item.ModItems;
-import net.minecraft.world.InteractionHand;
-import net.minecraft.world.entity.player.Player;
-import net.minecraft.world.item.ItemStack;
+import net.kasara.ts_multitools.item.SlimeItem;
+import net.minecraft.entity.player.PlayerEntity;
+import net.minecraft.item.ItemStack;
+import net.minecraft.util.Hand;
 
 public class SlimeAttackHandler {
 
@@ -11,10 +11,10 @@ public class SlimeAttackHandler {
      * 攻撃をキャンセルするかどうかを判定
      * SlimeItemを持っていて、経験値が0の場合は攻撃不可
      */
-    public static boolean shouldCancelAttack(Player player, InteractionHand hand) {
-        if (hand == InteractionHand.MAIN_HAND) {
-            ItemStack stack = player.getMainHandItem();
-            return stack.getItem() == ModItems.SLIME && player.totalExperience <= 0;
+    public static boolean shouldCancelAttack(PlayerEntity player, Hand hand) {
+        if (hand == Hand.MAIN_HAND) {
+            ItemStack stack = player.getMainHandStack();
+            return stack.getItem() instanceof SlimeItem && player.totalExperience <= 0;
         }
         return false;
     }

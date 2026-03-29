@@ -2,26 +2,25 @@ package net.kasara.ts_multitools.server.multitool;
 
 import com.google.common.collect.BiMap;
 import com.google.common.collect.ImmutableMap;
-import net.minecraft.advancements.CriteriaTriggers;
-import net.minecraft.core.BlockPos;
-import net.minecraft.core.Direction;
-import net.minecraft.core.component.DataComponents;
-import net.minecraft.server.level.ServerPlayer;
-import net.minecraft.sounds.SoundEvent;
-import net.minecraft.sounds.SoundEvents;
-import net.minecraft.sounds.SoundSource;
-import net.minecraft.world.InteractionHand;
-import net.minecraft.world.InteractionResult;
-import net.minecraft.world.entity.player.Player;
-import net.minecraft.world.item.HoneycombItem;
-import net.minecraft.world.item.ItemStack;
-import net.minecraft.world.item.context.UseOnContext;
-import net.minecraft.world.level.Level;
-import net.minecraft.world.level.block.*;
-import net.minecraft.world.level.block.state.BlockState;
-import net.minecraft.world.level.block.state.properties.ChestType;
-import net.minecraft.world.level.gameevent.GameEvent;
-import org.jspecify.annotations.Nullable;
+import net.minecraft.advancement.criterion.Criteria;
+import net.minecraft.block.*;
+import net.minecraft.component.DataComponentTypes;
+import net.minecraft.entity.LivingEntity;
+import net.minecraft.entity.player.PlayerEntity;
+import net.minecraft.item.HoneycombItem;
+import net.minecraft.item.ItemStack;
+import net.minecraft.item.ItemUsageContext;
+import net.minecraft.server.network.ServerPlayerEntity;
+import net.minecraft.sound.SoundCategory;
+import net.minecraft.sound.SoundEvent;
+import net.minecraft.sound.SoundEvents;
+import net.minecraft.util.ActionResult;
+import net.minecraft.util.Hand;
+import net.minecraft.util.math.BlockPos;
+import net.minecraft.util.math.Direction;
+import net.minecraft.world.World;
+import net.minecraft.world.event.GameEvent;
+import org.jetbrains.annotations.Nullable;
 
 import java.util.Map;
 import java.util.Optional;
@@ -29,9 +28,9 @@ import java.util.Optional;
 /**
  * AxeItemの右クリックコピー
  */
-public class AxeRightClickHandler{
+public class AxeRightClickHandler {
 
-    private static final Map<Block, Block> STRIPPABLES = new ImmutableMap.Builder<Block, Block>()
+    private static final Map<Block, Block> STRIPPED_BLOCKS = new ImmutableMap.Builder<Block, Block>()
             .put(Blocks.OAK_WOOD, Blocks.STRIPPED_OAK_WOOD)
             .put(Blocks.OAK_LOG, Blocks.STRIPPED_OAK_LOG)
             .put(Blocks.DARK_OAK_WOOD, Blocks.STRIPPED_DARK_OAK_WOOD)
@@ -57,54 +56,56 @@ public class AxeRightClickHandler{
             .put(Blocks.BAMBOO_BLOCK, Blocks.STRIPPED_BAMBOO_BLOCK)
             .build();
 
-    public static InteractionResult tryAxeAction(UseOnContext context) {
-        Level level = context.getLevel();
-        BlockPos pos = context.getClickedPos();
-        Player player = context.getPlayer();
-        if (playerHasBlockingItemUseIntent(context)) {
-            return InteractionResult.PASS;
+    public static ActionResult tryAxeAction(ItemUsageContext context) {
+        World world = context.getWorld();
+        BlockPos blockPos = context.getBlockPos();
+        PlayerEntity playerEntity = context.getPlayer();
+        if (shouldCancelStripAttempt(context)) {
+            return ActionResult.PASS;
         } else {
-            Optional<BlockState> newBlock = evaluateNewBlockState(level, pos, player, level.getBlockState(pos));
-            if (newBlock.isEmpty()) {
-                return InteractionResult.PASS;
+            Optional<BlockState> optional = tryStrip(world, blockPos, playerEntity, world.getBlockState(blockPos));
+            if (optional.isEmpty()) {
+                return ActionResult.PASS;
             } else {
-                ItemStack itemInHand = context.getItemInHand();
-                if (player instanceof ServerPlayer) {
-                    CriteriaTriggers.ITEM_USED_ON_BLOCK.trigger((ServerPlayer)player, pos, itemInHand);
+                ItemStack itemStack = context.getStack();
+                if (playerEntity instanceof ServerPlayerEntity) {
+                    Criteria.ITEM_USED_ON_BLOCK.trigger((ServerPlayerEntity)playerEntity, blockPos, itemStack);
                 }
 
-                level.setBlock(pos, (BlockState)newBlock.get(), 11);
-                level.gameEvent(GameEvent.BLOCK_CHANGE, pos, GameEvent.Context.of(player, (BlockState)newBlock.get()));
-                if (player != null) {
-                    itemInHand.hurtAndBreak(1, player, context.getHand().asEquipmentSlot());
+                world.setBlockState(blockPos, (BlockState)optional.get(), Block.NOTIFY_ALL_AND_REDRAW);
+                world.emitGameEvent(GameEvent.BLOCK_CHANGE, blockPos, GameEvent.Emitter.of(playerEntity, (BlockState)optional.get()));
+                if (playerEntity != null) {
+                    itemStack.damage(1, playerEntity, LivingEntity.getSlotForHand(context.getHand()));
                 }
 
-                return InteractionResult.SUCCESS;
+                return ActionResult.SUCCESS;
             }
         }
     }
 
-    private static boolean playerHasBlockingItemUseIntent(final UseOnContext context) {
-        Player player = context.getPlayer();
-        return context.getHand().equals(InteractionHand.MAIN_HAND) && player.getOffhandItem().has(DataComponents.BLOCKS_ATTACKS) && !player.isSecondaryUseActive();
+    private static boolean shouldCancelStripAttempt(ItemUsageContext context) {
+        PlayerEntity playerEntity = context.getPlayer();
+        return context.getHand().equals(Hand.MAIN_HAND)
+                && playerEntity.getOffHandStack().contains(DataComponentTypes.BLOCKS_ATTACKS)
+                && !playerEntity.shouldCancelInteraction();
     }
 
-    private static Optional<BlockState> evaluateNewBlockState(final Level level, final BlockPos pos, @Nullable final Player player, final BlockState oldState) {
-        Optional<BlockState> strippedBlock = getStripped(oldState);
-        if (strippedBlock.isPresent()) {
-            level.playSound(player, pos, SoundEvents.AXE_STRIP, SoundSource.BLOCKS, 1.0F, 1.0F);
-            return strippedBlock;
+    private static Optional<BlockState> tryStrip(World world, BlockPos pos, @Nullable PlayerEntity player, BlockState state) {
+        Optional<BlockState> optional = getStrippedState(state);
+        if (optional.isPresent()) {
+            world.playSound(player, pos, SoundEvents.ITEM_AXE_STRIP, SoundCategory.BLOCKS, 1.0F, 1.0F);
+            return optional;
         } else {
-            Optional<BlockState> scrapedBlock = WeatheringCopper.getPrevious(oldState);
-            if (scrapedBlock.isPresent()) {
-                spawnSoundAndParticle(level, pos, player, oldState, SoundEvents.AXE_SCRAPE, 3005);
-                return scrapedBlock;
+            Optional<BlockState> optional2 = Oxidizable.getDecreasedOxidationState(state);
+            if (optional2.isPresent()) {
+                strip(world, pos, player, state, SoundEvents.ITEM_AXE_SCRAPE, 3005);
+                return optional2;
             } else {
-                Optional<BlockState> waxoffBlock = Optional.ofNullable((Block)((BiMap) HoneycombItem.WAX_OFF_BY_BLOCK.get()).get(oldState.getBlock()))
-                        .map(b -> b.withPropertiesOf(oldState));
-                if (waxoffBlock.isPresent()) {
-                    spawnSoundAndParticle(level, pos, player, oldState, SoundEvents.AXE_WAX_OFF, 3004);
-                    return waxoffBlock;
+                Optional<BlockState> optional3 = Optional.ofNullable((Block)((BiMap) HoneycombItem.WAXED_TO_UNWAXED_BLOCKS.get()).get(state.getBlock()))
+                        .map(block -> block.getStateWithProperties(state));
+                if (optional3.isPresent()) {
+                    strip(world, pos, player, state, SoundEvents.ITEM_AXE_WAX_OFF, 3004);
+                    return optional3;
                 } else {
                     return Optional.empty();
                 }
@@ -112,20 +113,13 @@ public class AxeRightClickHandler{
         }
     }
 
-    private static void spawnSoundAndParticle(
-            final Level level, final BlockPos pos, @Nullable final Player player, final BlockState oldState, final SoundEvent soundEvent, final int particle
-    ) {
-        level.playSound(player, pos, soundEvent, SoundSource.BLOCKS, 1.0F, 1.0F);
-        level.levelEvent(player, particle, pos, 0);
-        if (oldState.getBlock() instanceof ChestBlock && oldState.getValue(ChestBlock.TYPE) != ChestType.SINGLE) {
-            BlockPos neighborPos = ChestBlock.getConnectedBlockPos(pos, oldState);
-            level.gameEvent(GameEvent.BLOCK_CHANGE, neighborPos, GameEvent.Context.of(player, level.getBlockState(neighborPos)));
-            level.levelEvent(player, particle, neighborPos, 0);
-        }
+    private static void strip(World world, BlockPos pos, @Nullable PlayerEntity player, BlockState state, SoundEvent sound, int worldEvent) {
+        world.playSound(player, pos, sound, SoundCategory.BLOCKS, 1.0F, 1.0F);
+        world.syncWorldEvent(player, worldEvent, pos, 0);
     }
 
-    private static Optional<BlockState> getStripped(final BlockState state) {
-        return Optional.ofNullable((Block)STRIPPABLES.get(state.getBlock()))
-                .map(block -> block.defaultBlockState().setValue(RotatedPillarBlock.AXIS, (Direction.Axis)state.getValue(RotatedPillarBlock.AXIS)));
+    private static Optional<BlockState> getStrippedState(BlockState state) {
+        return Optional.ofNullable((Block)STRIPPED_BLOCKS.get(state.getBlock()))
+                .map(block -> block.getDefaultState().with(PillarBlock.AXIS, (Direction.Axis)state.get(PillarBlock.AXIS)));
     }
 }

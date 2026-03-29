@@ -1,7 +1,7 @@
 package net.kasara.ts_multitools.item;
 
 import net.kasara.ts_multitools.util.ModTags;
-import net.minecraft.world.item.ToolMaterial;
+import net.minecraft.item.ToolMaterial;
 
 /**
  * カスタムツール素材を定義するクラス

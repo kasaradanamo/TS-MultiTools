@@ -1,48 +1,49 @@
 package net.kasara.ts_multitools.recipe;
 
-import com.mojang.serialization.MapCodec;
 import net.kasara.tokorotenslime.api.TokorotenSlimeAPI;
 import net.kasara.ts_multitools.component.MiningEnchantLevelComponent;
 import net.kasara.ts_multitools.component.ModComponents;
 import net.kasara.ts_multitools.item.ModItems;
-import net.minecraft.core.Holder;
-import net.minecraft.core.component.DataComponents;
-import net.minecraft.network.RegistryFriendlyByteBuf;
-import net.minecraft.network.codec.StreamCodec;
-import net.minecraft.resources.Identifier;
-import net.minecraft.world.item.Item;
-import net.minecraft.world.item.ItemStack;
-import net.minecraft.world.item.ItemStackTemplate;
-import net.minecraft.world.item.Items;
-import net.minecraft.world.item.crafting.*;
-import net.minecraft.world.item.crafting.display.RecipeDisplay;
-import net.minecraft.world.item.crafting.display.ShapelessCraftingRecipeDisplay;
-import net.minecraft.world.item.crafting.display.SlotDisplay;
-import net.minecraft.world.item.enchantment.Enchantment;
-import net.minecraft.world.item.enchantment.Enchantments;
-import net.minecraft.world.item.enchantment.ItemEnchantments;
-import net.minecraft.world.level.Level;
+import net.minecraft.component.DataComponentTypes;
+import net.minecraft.component.type.ItemEnchantmentsComponent;
+import net.minecraft.enchantment.Enchantment;
+import net.minecraft.enchantment.Enchantments;
+import net.minecraft.item.ItemStack;
+import net.minecraft.item.Items;
+import net.minecraft.recipe.Ingredient;
+import net.minecraft.recipe.IngredientPlacement;
+import net.minecraft.recipe.RecipeSerializer;
+import net.minecraft.recipe.SpecialCraftingRecipe;
+import net.minecraft.recipe.book.CraftingRecipeCategory;
+import net.minecraft.recipe.display.RecipeDisplay;
+import net.minecraft.recipe.display.ShapelessCraftingRecipeDisplay;
+import net.minecraft.recipe.display.SlotDisplay;
+import net.minecraft.recipe.input.CraftingRecipeInput;
+import net.minecraft.registry.RegistryWrapper;
+import net.minecraft.registry.entry.RegistryEntry;
+import net.minecraft.util.Identifier;
+import net.minecraft.world.World;
 
 import java.util.List;
+import java.util.Map;
 
 /**
  * スライムのレシピ
  */
-public class SlimeRecipe extends CustomRecipe {
-
-    private static final MapCodec<SlimeRecipe> MAP_CODEC = MapCodec.unit(new SlimeRecipe());
-
-    private static final StreamCodec<RegistryFriendlyByteBuf, SlimeRecipe> STREAM_CODEC =
-            StreamCodec.unit(new SlimeRecipe());
+public class SlimeRecipe extends SpecialCraftingRecipe {
 
     public static final RecipeSerializer<SlimeRecipe> INSTANCE =
-            new RecipeSerializer<>(MAP_CODEC, STREAM_CODEC);
+            new SpecialRecipeSerializer<>(category -> new SlimeRecipe());
+
+    public SlimeRecipe() {
+        super(CraftingRecipeCategory.EQUIPMENT);    // クラフトカテゴリ：装備
+    }
 
     /**
      * スライムのレシピ判定
      */
     @Override
-    public boolean matches(CraftingInput input, Level level) {
+    public boolean matches(CraftingRecipeInput input, World world) {
         int slimeCount = 0;
         boolean hasSword = false, hasPickaxe = false, hasAxe = false,
                 hasShovel = false, hasHoe = false, hasBow = false, hasStar = false;
@@ -50,11 +51,11 @@ public class SlimeRecipe extends CustomRecipe {
         boolean hasMultitool = false;
 
         for (int i = 0; i < input.size(); i++) {
-            ItemStack stack = input.getItem(i);
+            ItemStack stack = input.getStackInSlot(i);
             if (stack.isEmpty()) continue;
 
             // 必要なアイテムを判定
-            Item item = stack.getItem();
+            var item = stack.getItem();
             if (item == Items.SLIME_BALL) slimeCount++;
             else if (item == Items.NETHERITE_SWORD) hasSword = true;
             else if (item == Items.NETHERITE_PICKAXE) hasPickaxe = true;
@@ -64,16 +65,17 @@ public class SlimeRecipe extends CustomRecipe {
             else if (item == Items.BOW) hasBow = true;
             else if (item == Items.NETHER_STAR) hasStar = true;
 
+            // レシピ2用
             else if (item == ModItems.NETHERITE_MULTITOOL) hasMultitool = true;
 
             else return false;  // 不要なアイテムがあればレシピ不一致
         }
 
-        //　レシピ1（ネザライトツール）
-        boolean recipe1 = slimeCount == 2 && hasSword && hasPickaxe && hasAxe &&
+        //　レシピ1（ネザライトツール単体）
+        boolean recipe1 = slimeCount == 2 && hasSword && hasPickaxe && hasAxe&&
                             hasShovel && hasHoe && hasBow && hasStar;
 
-        // レシピ2(ネザライトマルチツール)
+        // レシピ2（マルチツール）
         boolean recipe2 = slimeCount == 2 && hasMultitool && hasBow && hasStar &&
                             !(hasSword || hasPickaxe || hasAxe || hasShovel || hasHoe);
 
@@ -84,11 +86,11 @@ public class SlimeRecipe extends CustomRecipe {
      * リザルトアイテムの処理
      */
     @Override
-    public ItemStack assemble(CraftingInput input) {
+    public ItemStack craft(CraftingRecipeInput input, RegistryWrapper.WrapperLookup registries) {
         ItemStack result = new ItemStack(ModItems.SLIME);
 
-        // エンチャントボックス初期化
-        ItemEnchantments.Mutable mutable = new ItemEnchantments.Mutable(ItemEnchantments.EMPTY);
+        // エンチャントのビルダー初期化
+        ItemEnchantmentsComponent.Builder builder = new ItemEnchantmentsComponent.Builder(ItemEnchantmentsComponent.DEFAULT);
 
         // マイニングエンチャントのコンポーネントを取得
         MiningEnchantLevelComponent comp = result.get(ModComponents.MINING_ENCHANT_LEVEL);
@@ -98,42 +100,43 @@ public class SlimeRecipe extends CustomRecipe {
         boolean hasFortune = false;
 
         // スロット全部確認
-        for (ItemStack stack : input.items()) {
-            if (stack.isEmpty() || !stack.isEnchanted()) continue;
+        for (ItemStack stack : input.getStacks()) {
+            if (stack.isEmpty() || !stack.hasEnchantments()) continue;
 
             // 元アイテムのエンチャントを取得
-            ItemEnchantments enchants = stack.getEnchantments();
+            ItemEnchantmentsComponent enchants = stack.get(DataComponentTypes.ENCHANTMENTS);
 
-            for (Holder<Enchantment> holder : enchants.keySet()) {
+            for(Map.Entry<RegistryEntry<Enchantment>, Integer> entry : enchants.getEnchantmentEntries()) {
+                RegistryEntry<Enchantment> enchant = entry.getKey();
+
                 // 除外エンチャントは無視
-                if (holder.is(Enchantments.UNBREAKING) || holder.is(Enchantments.MENDING) || holder.is((Enchantments.INFINITY))) {
-                    continue;
-                }
+                if (enchant.matchesKey(Enchantments.UNBREAKING) ||
+                        enchant.matchesKey(Enchantments.MENDING) ||
+                        enchant.matchesKey((Enchantments.INFINITY))) continue;
 
                 // エンチャントのレベル
-                int level = enchants.getLevel(holder);
+                int level = entry.getValue();
 
-                // エンチャントがシルクタッチだった場合
-                if (holder.is(Enchantments.SILK_TOUCH)) {
+                if (enchant.matchesKey(Enchantments.SILK_TOUCH)) {
                     comp = comp.withSilkTouch(level >= 2 ? level : 1);
                     if (!hasFortune) {
-                        mutable.set(holder, comp.silkTouchLevel());
+                        builder.set(enchant, comp.silkTouchLevel());
                         hasSilkTouch = true;
                     }
                 }
                 // エンチャントが幸運だった場合
-                else if (holder.is(Enchantments.FORTUNE)) {
+                else if (enchant.matchesKey(Enchantments.FORTUNE)) {
                     comp = comp.withFortune(level >= 4 ? level : 3);
                     if (!hasSilkTouch) {
-                        mutable.set(holder, comp.fortuneLevel());
+                        builder.set(enchant, comp.fortuneLevel());
                         hasFortune = true;
                     }
                 }
                 // 上記以外の場合
                 else {
-                    int current = mutable.getLevel(holder);
+                    int current = builder.getLevel(enchant);
                     if (level > current) {
-                        mutable.set(holder, level);
+                        builder.set(enchant, level);
                     }
                 }
             }
@@ -141,19 +144,14 @@ public class SlimeRecipe extends CustomRecipe {
 
         // エンチャントとマイニング情報を結果アイテムにセット
         result.set(ModComponents.MINING_ENCHANT_LEVEL, comp);
-        result.set(DataComponents.ENCHANTMENTS, mutable.toImmutable());
+        result.set(DataComponentTypes.ENCHANTMENTS, builder.build());
 
         return result;
     }
 
     @Override
-    public RecipeSerializer<? extends CustomRecipe> getSerializer() {
+    public RecipeSerializer<? extends SpecialCraftingRecipe> getSerializer() {
         return INSTANCE;
-    }
-
-    @Override
-    public CraftingBookCategory category() {
-        return CraftingBookCategory.EQUIPMENT;
     }
 
     // レシピ開放時、右上に表示されるかどうか
@@ -163,13 +161,13 @@ public class SlimeRecipe extends CustomRecipe {
     }
 
     @Override
-    public String group() {
-        return Identifier.fromNamespaceAndPath(TokorotenSlimeAPI.getModId(), "slime").toString();
+    public String getGroup() {
+        return Identifier.of(TokorotenSlimeAPI.getModId(), "slime").toString();
     }
 
     // falseにしないとレシピ本に載らない
     @Override
-    public boolean isSpecial() {
+    public boolean isIgnoredInRecipeBook() {
         return false;
     }
 
@@ -177,18 +175,18 @@ public class SlimeRecipe extends CustomRecipe {
      * レシピ本アイテム判定
      */
     @Override
-    public PlacementInfo placementInfo() {
-        return PlacementInfo.create(List.of(
-                Ingredient.of(Items.NETHERITE_SHOVEL),
-                Ingredient.of(Items.NETHERITE_PICKAXE),
-                Ingredient.of(Items.NETHERITE_AXE),
-                Ingredient.of(Items.NETHERITE_HOE),
-                Ingredient.of(Items.NETHERITE_SWORD),
-                Ingredient.of(Items.BOW),
-                Ingredient.of(Items.NETHER_STAR),
-                Ingredient.of(Items.SLIME_BALL),
-                Ingredient.of(Items.SLIME_BALL),
-                Ingredient.of(ModItems.NETHERITE_MULTITOOL)
+    public IngredientPlacement getIngredientPlacement() {
+        return IngredientPlacement.forShapeless(List.of(
+                Ingredient.ofItem(Items.NETHERITE_SHOVEL),
+                Ingredient.ofItem(Items.NETHERITE_PICKAXE),
+                Ingredient.ofItem(Items.NETHERITE_AXE),
+                Ingredient.ofItem(Items.NETHERITE_HOE),
+                Ingredient.ofItem(Items.NETHERITE_SWORD),
+                Ingredient.ofItem(Items.BOW),
+                Ingredient.ofItem(Items.NETHER_STAR),
+                Ingredient.ofItem(Items.SLIME_BALL),
+                Ingredient.ofItem(Items.SLIME_BALL),
+                Ingredient.ofItem(ModItems.NETHERITE_MULTITOOL)
         ));
     }
 
@@ -196,32 +194,32 @@ public class SlimeRecipe extends CustomRecipe {
      * レシピ表示
      */
     @Override
-    public List<RecipeDisplay> display() {
+    public List<RecipeDisplay> getDisplays() {
         return List.of(
                 new ShapelessCraftingRecipeDisplay(
                         List.of(
-                                Ingredient.of(Items.NETHERITE_SHOVEL).display(),
-                                Ingredient.of(Items.NETHERITE_PICKAXE).display(),
-                                Ingredient.of(Items.NETHERITE_AXE).display(),
-                                Ingredient.of(Items.NETHERITE_HOE).display(),
-                                Ingredient.of(Items.NETHERITE_SWORD).display(),
-                                Ingredient.of(Items.BOW).display(),
-                                Ingredient.of(Items.NETHER_STAR).display(),
-                                Ingredient.of(Items.SLIME_BALL).display(),
-                                Ingredient.of(Items.SLIME_BALL).display()
+                                Ingredient.ofItem(Items.NETHERITE_SHOVEL).toDisplay(),
+                                Ingredient.ofItem(Items.NETHERITE_PICKAXE).toDisplay(),
+                                Ingredient.ofItem(Items.NETHERITE_AXE).toDisplay(),
+                                Ingredient.ofItem(Items.NETHERITE_HOE).toDisplay(),
+                                Ingredient.ofItem(Items.NETHERITE_SWORD).toDisplay(),
+                                Ingredient.ofItem(Items.BOW).toDisplay(),
+                                Ingredient.ofItem(Items.NETHER_STAR).toDisplay(),
+                                Ingredient.ofItem(Items.SLIME_BALL).toDisplay(),
+                                Ingredient.ofItem(Items.SLIME_BALL).toDisplay()
                         ),
-                        new SlotDisplay.ItemStackSlotDisplay(new ItemStackTemplate(ModItems.SLIME)),
+                        new SlotDisplay.ItemSlotDisplay(ModItems.SLIME),
                         new SlotDisplay.ItemSlotDisplay(Items.CRAFTING_TABLE)
                 ),
                 new ShapelessCraftingRecipeDisplay(
                         List.of(
-                                Ingredient.of(ModItems.NETHERITE_MULTITOOL).display(),
-                                Ingredient.of(Items.BOW).display(),
-                                Ingredient.of(Items.NETHER_STAR).display(),
-                                Ingredient.of(Items.SLIME_BALL).display(),
-                                Ingredient.of(Items.SLIME_BALL).display()
+                                Ingredient.ofItem(ModItems.NETHERITE_MULTITOOL).toDisplay(),
+                                Ingredient.ofItem(Items.BOW).toDisplay(),
+                                Ingredient.ofItem(Items.NETHER_STAR).toDisplay(),
+                                Ingredient.ofItem(Items.SLIME_BALL).toDisplay(),
+                                Ingredient.ofItem(Items.SLIME_BALL).toDisplay()
                         ),
-                        new SlotDisplay.ItemStackSlotDisplay(new ItemStackTemplate(ModItems.SLIME)),
+                        new SlotDisplay.ItemSlotDisplay(ModItems.SLIME),
                         new SlotDisplay.ItemSlotDisplay(Items.CRAFTING_TABLE)
                 )
         );

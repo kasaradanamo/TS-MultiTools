@@ -1,6 +1,6 @@
 package net.kasara.ts_multitools.util;
 
-import net.minecraft.world.entity.player.Player;
+import net.minecraft.entity.player.PlayerEntity;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -21,21 +21,21 @@ public class OffhandTriggerTracker {
      * @param player 対象プレイヤー
      * @param value true = オフハンド操作あり, false = なし
      */
-    public static void set(Player player, boolean value) {
-        TRIGGER_MAP.put(player.getUUID(), value);
+    public static void set(PlayerEntity player, boolean value) {
+        TRIGGER_MAP.put(player.getUuid(), value);
     }
 
     /**
      * 指定プレイヤーのオフハンドトリガー状態を取得する
      */
-    public static boolean get(Player player) {
-        return TRIGGER_MAP.getOrDefault(player.getUUID(), false);
+    public static boolean get(PlayerEntity player) {
+        return TRIGGER_MAP.getOrDefault(player.getUuid(), false);
     }
 
     /**
      * 指定プレイヤーのオフハンドトリガー状態をクリアする
      */
-    public static void clear(Player player) {
-        TRIGGER_MAP.remove(player.getUUID());
+    public static void clear(PlayerEntity player) {
+        TRIGGER_MAP.remove(player.getUuid());
     }
 }

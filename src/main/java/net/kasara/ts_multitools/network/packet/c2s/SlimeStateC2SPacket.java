@@ -3,35 +3,35 @@ package net.kasara.ts_multitools.network.packet.c2s;
 import net.fabricmc.fabric.api.client.networking.v1.ClientPlayNetworking;
 import net.kasara.ts_multitools.TSMultitools;
 import net.kasara.ts_multitools.server.SlimeStateServerHandler;
-import net.minecraft.core.UUIDUtil;
-import net.minecraft.network.RegistryFriendlyByteBuf;
-import net.minecraft.network.codec.ByteBufCodecs;
-import net.minecraft.network.codec.StreamCodec;
-import net.minecraft.network.protocol.common.custom.CustomPacketPayload;
-import net.minecraft.resources.Identifier;
-import net.minecraft.server.level.ServerPlayer;
+import net.minecraft.network.RegistryByteBuf;
+import net.minecraft.network.codec.PacketCodec;
+import net.minecraft.network.codec.PacketCodecs;
+import net.minecraft.network.packet.CustomPayload;
+import net.minecraft.server.network.ServerPlayerEntity;
+import net.minecraft.util.Identifier;
+import net.minecraft.util.Uuids;
 
 import java.util.UUID;
 
 /**
  * スライムの状態(state)をサーバーに通知する
  */
-public record SlimeStateC2SPacket(UUID uuid, String state) implements CustomPacketPayload {
+public record SlimeStateC2SPacket(UUID uuid, String state) implements CustomPayload {
 
-    public static final CustomPacketPayload.Type<SlimeStateC2SPacket> ID =
-            new CustomPacketPayload.Type<>(Identifier.fromNamespaceAndPath(TSMultitools.MOD_ID, "slime_state"));
+    public static final Id<SlimeStateC2SPacket> ID =
+            new Id<>(Identifier.of(TSMultitools.MOD_ID, "slime_state"));
 
-    public static final StreamCodec<RegistryFriendlyByteBuf, SlimeStateC2SPacket> CODEC =
-            StreamCodec.composite(
-                    UUIDUtil.STREAM_CODEC,
+    public static final PacketCodec<RegistryByteBuf, SlimeStateC2SPacket> CODEC =
+            PacketCodec.tuple(
+                    Uuids.PACKET_CODEC,
                     SlimeStateC2SPacket::uuid,
-                    ByteBufCodecs.stringUtf8(16),
+                    PacketCodecs.string(16),
                     SlimeStateC2SPacket::state,
                     SlimeStateC2SPacket::new
             );
 
     @Override
-    public CustomPacketPayload.Type<? extends CustomPacketPayload> type() {
+    public Id<? extends CustomPayload> getId() {
         return ID;
     }
 
@@ -39,7 +39,7 @@ public record SlimeStateC2SPacket(UUID uuid, String state) implements CustomPack
         ClientPlayNetworking.send(new SlimeStateC2SPacket(uuid, state));
     }
 
-    public static void receive(SlimeStateC2SPacket packet, ServerPlayer player) {
+    public static void receive(SlimeStateC2SPacket packet, ServerPlayerEntity player) {
         SlimeStateServerHandler.onSlimeStateUpdate(packet.uuid(), packet.state(), player);
     }
 }

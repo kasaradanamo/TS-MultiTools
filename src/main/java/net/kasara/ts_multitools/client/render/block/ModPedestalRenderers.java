@@ -6,7 +6,7 @@ import net.kasara.tokorotenslime.api.TokorotenSlimeAPI;
 import net.kasara.ts_multitools.TSMultitools;
 import net.kasara.ts_multitools.component.ModComponents;
 import net.kasara.ts_multitools.item.ModItems;
-import net.minecraft.world.item.ItemStack;
+import net.minecraft.item.ItemStack;
 
 /**
  * TokorotenSlimeの台座に置いた際の表示アイテム変更

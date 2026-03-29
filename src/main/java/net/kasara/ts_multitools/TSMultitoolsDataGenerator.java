@@ -6,5 +6,6 @@ import net.fabricmc.fabric.api.datagen.v1.FabricDataGenerator;
 public class TSMultitoolsDataGenerator implements DataGeneratorEntrypoint {
     @Override
     public void onInitializeDataGenerator(FabricDataGenerator fabricDataGenerator) {
+
     }
 }

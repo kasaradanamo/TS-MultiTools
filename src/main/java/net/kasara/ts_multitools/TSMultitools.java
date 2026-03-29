@@ -1,7 +1,6 @@
 package net.kasara.ts_multitools;
 
 import net.fabricmc.api.ModInitializer;
-
 import net.kasara.ts_multitools.command.ModCommand;
 import net.kasara.ts_multitools.component.ModComponents;
 import net.kasara.ts_multitools.entity.ModEntities;

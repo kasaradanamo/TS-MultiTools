@@ -5,15 +5,15 @@ import net.fabricmc.api.Environment;
 import net.kasara.ts_multitools.component.ModComponents;
 import net.kasara.ts_multitools.network.packet.c2s.SlimeStateC2SPacket;
 import net.kasara.ts_multitools.server.ToolRightClickHandler;
-import net.minecraft.client.Minecraft;
-import net.minecraft.core.BlockPos;
-import net.minecraft.core.registries.BuiltInRegistries;
-import net.minecraft.tags.BlockTags;
-import net.minecraft.world.InteractionHand;
-import net.minecraft.world.entity.player.Player;
-import net.minecraft.world.item.ItemStack;
-import net.minecraft.world.level.Level;
-import net.minecraft.world.level.block.state.BlockState;
+import net.minecraft.block.BlockState;
+import net.minecraft.client.MinecraftClient;
+import net.minecraft.entity.player.PlayerEntity;
+import net.minecraft.item.ItemStack;
+import net.minecraft.registry.Registries;
+import net.minecraft.registry.tag.BlockTags;
+import net.minecraft.util.Hand;
+import net.minecraft.util.math.BlockPos;
+import net.minecraft.world.World;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -38,14 +38,14 @@ public class SlimeStateClientHandler {
     /**
      * ブロック攻撃時に呼ばれる
      */
-    public static void onAttackBlock(Player player, Level level, InteractionHand hand, BlockPos pos) {
-        ItemStack stack = player.getItemInHand(hand);
+    public static void onAttackBlock(PlayerEntity player, World world, Hand hand, BlockPos pos) {
+        ItemStack stack = player.getStackInHand(hand);
 
         UUID uuid = stack.get(ModComponents.SLIME_UUID);
         if (uuid == null) return;
 
         // ブロックに応じたツール種別を取得してstate更新
-        String state = getStateFromBlock(level.getBlockState(pos));
+        String state = getStateFromBlock(world.getBlockState(pos));
         slimeStateDuringMining.put(uuid, state);
 
         // 採掘中はタイマーをリセット
@@ -56,14 +56,14 @@ public class SlimeStateClientHandler {
 
     /**
      * 毎tick呼ばれ、スライムのstateを更新
-     * 採掘中かどうか、タイマー残り時間、プレイヤーの経験値を考慮
+     * - 採掘中かどうか、タイマー残り時間、プレイヤーの経験値を考慮
      */
-    public static void updateSlimeState(Player player, ItemStack stack, UUID uuid) {
-        ItemStack mainHand = player.getMainHandItem();
-        ItemStack offHand = player.getOffhandItem();
+    public static void updateSlimeState(PlayerEntity player, ItemStack stack, UUID uuid) {
+        ItemStack mainHand = player.getMainHandStack();
+        ItemStack offHand = player.getOffHandStack();
 
         boolean inHand = uuid.equals(mainHand.get(ModComponents.SLIME_UUID)) ||
-                         uuid.equals(offHand.get(ModComponents.SLIME_UUID));
+                uuid.equals(offHand.get(ModComponents.SLIME_UUID));
 
         String state = "slime";
 
@@ -73,7 +73,7 @@ public class SlimeStateClientHandler {
                 state = slimeStateDuringMining.get(uuid);
 
                 // 採掘が終わったらタイマー開始
-                if (!Minecraft.getInstance().gameMode.isDestroying()) {
+                if (!MinecraftClient.getInstance().interactionManager.isBreakingBlock()) {
                     slimeTimers.put(uuid, 40);  // 約2秒間維持
                     slimeStateDuringMining.remove(uuid);
                 }
@@ -119,11 +119,11 @@ public class SlimeStateClientHandler {
      * ブロックのタグから対応するツール種別を取得
      */
     private  static String getStateFromBlock(BlockState blockState) {
-        if (blockState.is(BlockTags.MINEABLE_WITH_PICKAXE) ||
-                BuiltInRegistries.BLOCK.getKey(blockState.getBlock()).getPath().contains("glass")) return "pickaxe";
-        else if (blockState.is(BlockTags.MINEABLE_WITH_AXE)) return "axe";
-        else if (blockState.is(BlockTags.MINEABLE_WITH_SHOVEL)) return "shovel";
-        else if (blockState.is(BlockTags.MINEABLE_WITH_HOE)) return "hoe";
+        if (blockState.isIn(BlockTags.PICKAXE_MINEABLE) ||
+                Registries.BLOCK.getId(blockState.getBlock()).getPath().contains("glass")) return "pickaxe";
+        else if (blockState.isIn(BlockTags.AXE_MINEABLE)) return "axe";
+        else if (blockState.isIn(BlockTags.SHOVEL_MINEABLE)) return "shovel";
+        else if (blockState.isIn(BlockTags.HOE_MINEABLE)) return "hoe";
         return "sword";
     }
 

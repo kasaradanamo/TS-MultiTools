@@ -7,12 +7,12 @@ import net.kasara.ts_multitools.client.render.block.ModPedestalRenderers;
 import net.kasara.ts_multitools.entity.ModEntities;
 import net.kasara.ts_multitools.client.render.entity.SlimeArrowRenderer;
 import net.kasara.ts_multitools.network.ModPackets;
-import net.kasara.ts_multitools.client.option.ModKeyMappings;
+import net.kasara.ts_multitools.client.option.ModKeyBindings;
 
 public class TSMultitoolsClient implements ClientModInitializer {
     @Override
     public void onInitializeClient() {
-        ModKeyMappings.register();  // キーイベント登録
+        ModKeyBindings.register();  // キーイベント登録
         ModClientEvents.registerEvents();   // クライアントイベント登録
 
         EntityRendererRegistry.register(ModEntities.SLIME_ARROW, SlimeArrowRenderer::new);  // スライム矢の描画
