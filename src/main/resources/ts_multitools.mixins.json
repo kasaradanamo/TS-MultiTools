@@ -5,7 +5,7 @@
 	"mixins": [
 		"ItemStackMixin",
 		"EnchantmentHelperMixin",
-        "MixinClientboundSetEquipmentPacket"
+        "ClientboundSetEquipmentPacketMixin"
 	],
     "client": [
         "client.AbstractClientPlayerMixin"
