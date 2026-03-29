@@ -34,7 +34,7 @@ Actually, everything up to this point is just a bonus feature.
 ### Crafting
 - You can create it using any of the following recipes:
     1. Netherite Shovel, Pickaxe, Axe, Hoe, Sword, Bow, Nether Star, and 2 Slimeballs
-    2. Netherite Multitool, Bow, Nether Star, and 2 Slimeballs  
+    2. Netherite Multitool, Bow, Nether Star, and 2 Slimeballs<br>
        ![slime_recipe_1](https://cdn.modrinth.com/data/cached_images/bf2c031ee913e8095fab396047fefc09bda2eb5d.png)
        ![slime_recipe_2](https://cdn.modrinth.com/data/cached_images/72c83f2d446a00b6aa86ed8354d78fae8ba30b47.png)
 
@@ -61,7 +61,6 @@ Actually, everything up to this point is just a bonus feature.
 
 ### Notes
 - The X key conflicts with the load hotbar activator, so one of them must be changed.
-- Slime recipes are not normally displayed.
 
 ---
 
@@ -79,7 +78,7 @@ The English explanation is above.<br>
 
 ## 木、石、銅、鉄、金、ダイヤ、ネザライトのマルチツール
 ### クラフト
-- それぞれの種類のシャベル、ツルハシ、斧、クワ、剣をクラフトに使用します。  
+- それぞれの種類のシャベル、ツルハシ、斧、クワ、剣をクラフトに使用します。<br>
   ![multitools_craft](https://cdn.modrinth.com/data/cached_images/8b6c72d68eab09fabadd83c6f476389eda941229.png)
 
 ### 仕様
@@ -126,7 +125,6 @@ The English explanation is above.<br>
 
 ### 注意事項
 - Xキーはホットバーの読み込みと被っているため、どちらかの変更が必要です。
-- スライムのレシピは通常表示されません。
 
 ---
 
