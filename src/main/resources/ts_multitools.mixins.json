@@ -5,7 +5,7 @@
 	"mixins": [
 		"ItemStackMixin",
 		"EnchantmentHelperMixin",
-        "MixinEntityEquipmentUpdateS2CPacket"
+        "EntityEquipmentUpdateS2CPacketMixin"
 	],
 	"injectors": {
 		"defaultRequire": 1
