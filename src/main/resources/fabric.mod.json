@@ -9,12 +9,12 @@
 	],
 	"contact": {
 		"homepage": "https://modrinth.com/mod/ts-multitools",
-        "issues": "https://github.com/kasaradanamo/TS-Multitools/issues"
+		"issues": "https://github.com/kasaradanamo/TS-Multitools/issues"
 	},
 	"license": [
-      "Source code: MIT",
-      "Assets: All rights reserved"
-    ],
+		"Source code: MIT",
+		"Assets: All rights reserved"
+	],
 	"icon": "assets/ts_multitools/icon.png",
 	"environment": "*",
 	"entrypoints": {
@@ -32,9 +32,9 @@
 		"ts_multitools.mixins.json"
 	],
 	"depends": {
-		"fabricloader": ">=0.18.4",
-		"minecraft": "~26.1-",
-		"java": ">=25",
+		"fabricloader": ">=0.16.14",
+		"minecraft": "~1.21.8",
+		"java": ">=21",
 		"fabric-api": "*",
 		"tokorotenslime": ">=1.1.1"
 	}
