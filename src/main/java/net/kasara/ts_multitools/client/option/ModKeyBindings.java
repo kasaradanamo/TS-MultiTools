@@ -9,12 +9,6 @@ import net.minecraft.client.option.KeyBinding;
 import net.minecraft.client.util.InputUtil;
 import org.lwjgl.glfw.GLFW;
 
-/**
- * ModKeyBindingsクラス
- *
- * このクラスはMod内で使用するキー操作（KeyBinding）を登録するためのユーティリティクラス
- * クライアント側で特定のキーを押したときにイベントをトリガーすることができる
- */
 @Environment(EnvType.CLIENT)
 public class ModKeyBindings {
 
@@ -22,15 +16,14 @@ public class ModKeyBindings {
     public static KeyBinding MODE_TOGGLE;
 
     /**
-     * キーバインディングを登録するメソッド
      * GLFWのキーコードとキー名を指定して登録
      */
     public static void register() {
         MODE_TOGGLE = KeyBindingHelper.registerKeyBinding(new KeyBinding(
                 "key.tokorotenslime.mode_toggle",   // キー名（翻訳用）
-                InputUtil.Type.KEYSYM,                          // キーの種類
-                GLFW.GLFW_KEY_X,                                // デフォルトのキー
-                TokorotenSlimeAPI.getKeybindingCategory() // カテゴリ名（オプション画面で表示されるグループ）
+                InputUtil.Type.KEYSYM,                    // キーの種類
+                GLFW.GLFW_KEY_X,                          // デフォルトのキー
+                TokorotenSlimeAPI.getKeyBindingCategory() // カテゴリ名（オプション画面で表示されるグループ）
         ));
 
         // 登録完了ログを出力

@@ -14,8 +14,6 @@ public class SlimeStateServerCache {
 
     /**
      * スライムのstateを取得
-     * @param uuid  スライムのuuid
-     * @return  uuidのstate
      */
     public static String getSlimeState(UUID uuid) {
         return slimeState.get(uuid);
@@ -23,8 +21,6 @@ public class SlimeStateServerCache {
 
     /**
      * スライムのstateを設定
-     * @param uuid  スライムのuuid
-     * @param state スライムのstate
      */
     public static void setSlimeState(UUID uuid, String state) {
         slimeState.put(uuid, state);

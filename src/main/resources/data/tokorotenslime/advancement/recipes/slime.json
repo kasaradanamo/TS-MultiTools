@@ -4,7 +4,9 @@
     "has_material": {
       "conditions": {
         "items": [
-          {"items": "minecraft:slime_ball"}
+          {
+            "items": "minecraft:slime_ball"
+          }
         ]
       },
       "trigger": "minecraft:inventory_changed"

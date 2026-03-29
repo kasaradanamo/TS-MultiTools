@@ -1,54 +1,154 @@
 package net.kasara.ts_multitools.entity;
 
+import net.minecraft.component.DataComponentTypes;
+import net.minecraft.component.type.PotionContentsComponent;
+import net.minecraft.entity.Entity;
 import net.minecraft.entity.EntityType;
 import net.minecraft.entity.LivingEntity;
+import net.minecraft.entity.data.DataTracker;
+import net.minecraft.entity.data.TrackedData;
+import net.minecraft.entity.data.TrackedDataHandlerRegistry;
+import net.minecraft.entity.effect.StatusEffectInstance;
 import net.minecraft.entity.projectile.PersistentProjectileEntity;
 import net.minecraft.item.ItemStack;
+import net.minecraft.item.Items;
+import net.minecraft.particle.ParticleTypes;
+import net.minecraft.particle.TintedParticleEffect;
 import net.minecraft.world.World;
-import org.jetbrains.annotations.Nullable;
+import org.jspecify.annotations.Nullable;
 
 /**
- * 特殊な「スライム矢」エンティティ。
- * - 通常の矢と異なり、アイテムとして回収できない（クリエイティブ限定）。
- * - 主に見た目や挙動をカスタムするための基盤クラス。
+ * スライム矢エンティティ
+ * クリエ以外では拾えない
+ * 矢をコピーしてる
  */
 public class SlimeArrowEntity extends PersistentProjectileEntity {
 
-    /**
-     * ワールド内に直接スポーンさせるときに使われるコンストラクタ。
-     *
-     * @param entityType エンティティの種類
-     * @param world      ワールド
-     */
+    private static final int MAX_POTION_DURATION_TICKS = 600;
+    private static final int NO_POTION_COLOR = -1;
+    private static final TrackedData<Integer> COLOR = DataTracker.registerData(SlimeArrowEntity.class, TrackedDataHandlerRegistry.INTEGER);
+    private static final byte PARTICLE_EFFECT_STATUS = 0;
+
     public SlimeArrowEntity(EntityType<? extends SlimeArrowEntity> entityType, World world) {
         super(entityType, world);
-        // 矢を回収できるのはクリエイティブモードのみ
         this.pickupType = PickupPermission.CREATIVE_ONLY;
     }
 
-    /**
-     * 弓などから発射されたときに使われるコンストラクタ。
-     *
-     * @param type    エンティティの種類
-     * @param owner   矢を発射したエンティティ（プレイヤーやMobなど）
-     * @param world   ワールド
-     * @param stack   矢として使用した ItemStack
-     * @param weapon  発射に使われた武器（弓など）、null の可能性あり
-     */
-    public SlimeArrowEntity(EntityType<? extends SlimeArrowEntity> type, LivingEntity owner, World world, ItemStack stack, @Nullable ItemStack weapon) {
-        super(type, owner, world, stack, weapon);
-        // 矢を回収できるのはクリエイティブモードのみ
+    public SlimeArrowEntity(World world, double x, double y, double z, ItemStack stack, @Nullable ItemStack shotFrom) {
+        super(ModEntities.SLIME_ARROW, x, y, z, world, stack, shotFrom);
+        this.initColor();
         this.pickupType = PickupPermission.CREATIVE_ONLY;
     }
 
+
+    public SlimeArrowEntity(World world, LivingEntity owner, ItemStack stack, @org.jspecify.annotations.Nullable ItemStack shotFrom) {
+        super(ModEntities.SLIME_ARROW, owner, world, stack, shotFrom);
+        this.initColor();
+        this.pickupType = PickupPermission.CREATIVE_ONLY;
+    }
+
+    private PotionContentsComponent getPotionContents() {
+        return this.getItemStack().getOrDefault(DataComponentTypes.POTION_CONTENTS, PotionContentsComponent.DEFAULT);
+    }
+
+    private float getPotionDurationScale() {
+        return this.getItemStack().getOrDefault(DataComponentTypes.POTION_DURATION_SCALE, 1.0F);
+    }
+
+    private void setPotionContents(PotionContentsComponent potionContentsComponent) {
+        this.getItemStack().set(DataComponentTypes.POTION_CONTENTS, potionContentsComponent);
+        this.initColor();
+    }
+
+    @Override
+    protected void setStack(ItemStack stack) {
+        super.setStack(stack);
+        this.initColor();
+    }
+
+    private void initColor() {
+        PotionContentsComponent potionContentsComponent = this.getPotionContents();
+        this.dataTracker.set(COLOR, potionContentsComponent.equals(PotionContentsComponent.DEFAULT) ? -1 : potionContentsComponent.getColor());
+    }
+
+    public void addEffect(StatusEffectInstance effect) {
+        this.setPotionContents(this.getPotionContents().with(effect));
+    }
+
+    @Override
+    protected void initDataTracker(DataTracker.Builder builder) {
+        super.initDataTracker(builder);
+        builder.add(COLOR, -1);
+    }
+
+    @Override
+    public void tick() {
+        super.tick();
+        if (this.getEntityWorld().isClient()) {
+            if (this.isInGround()) {
+                if (this.inGroundTime % 5 == 0) {
+                    this.spawnParticles(1);
+                }
+            } else {
+                this.spawnParticles(2);
+            }
+        } else if (this.isInGround() && this.inGroundTime != 0 && !this.getPotionContents().equals(PotionContentsComponent.DEFAULT) && this.inGroundTime >= MAX_POTION_DURATION_TICKS) {
+            this.getEntityWorld().sendEntityStatus(this, PARTICLE_EFFECT_STATUS);
+            this.setStack(new ItemStack(Items.ARROW));
+        }
+    }
+
+    private void spawnParticles(int amount) {
+        int i = this.getColor();
+        if (i != -1 && amount > 0) {
+            for (int j = 0; j < amount; j++) {
+                this.getEntityWorld()
+                        .addParticleClient(
+                                TintedParticleEffect.create(ParticleTypes.ENTITY_EFFECT, i), this.getParticleX(0.5), this.getRandomBodyY(), this.getParticleZ(0.5), 0.0, 0.0, 0.0
+                        );
+            }
+        }
+    }
+
+    public int getColor() {
+        return this.dataTracker.get(COLOR);
+    }
+
+    @Override
+    protected void onHit(LivingEntity target) {
+        super.onHit(target);
+        Entity entity = this.getEffectCause();
+        PotionContentsComponent potionContentsComponent = this.getPotionContents();
+        float f = this.getPotionDurationScale();
+        potionContentsComponent.forEachEffect(effect -> target.addStatusEffect(effect, entity), f);
+    }
+
     /**
-     * 矢が地面に落ちたときなど、アイテムとして回収される際に返すスタック。
-     * このクラスでは「拾えない矢」として機能させるため EMPTY を返す。
-     *
-     * @return 空の ItemStack（何も返さない）
+     * 拾ったときのアイテム設定(ここは変更する)
      */
     @Override
     protected ItemStack getDefaultItemStack() {
         return ItemStack.EMPTY;
+    }
+
+    @Override
+    public void handleStatus(byte status) {
+        if (status == 0) {
+            int i = this.getColor();
+            if (i != -1) {
+                float f = (i >> 16 & 0xFF) / 255.0F;
+                float g = (i >> 8 & 0xFF) / 255.0F;
+                float h = (i >> 0 & 0xFF) / 255.0F;
+
+                for (int j = 0; j < 20; j++) {
+                    this.getEntityWorld()
+                            .addParticleClient(
+                                    TintedParticleEffect.create(ParticleTypes.ENTITY_EFFECT, f, g, h), this.getParticleX(0.5), this.getRandomBodyY(), this.getParticleZ(0.5), 0.0, 0.0, 0.0
+                            );
+                }
+            }
+        } else {
+            super.handleStatus(status);
+        }
     }
 }

@@ -4,8 +4,7 @@ import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 
 /**
- * クライアント側で保持するMod固有のデータ
- * 主にUI表示やクライアントだけで必要な情報を管理する
+ * スライム使用回数をクライアント側で保持する
  */
 @Environment(EnvType.CLIENT)
 public class SlimeUseCountClientCache {
@@ -15,7 +14,6 @@ public class SlimeUseCountClientCache {
 
     /**
      * スライムの使用回数を取得
-     * @return 現在の使用回数
      */
     public static int getSlimeUseCount() {
         return slimeUseCount;
@@ -23,7 +21,6 @@ public class SlimeUseCountClientCache {
 
     /**
      * スライムの使用回数を設定
-     * @param count 新しい使用回数
      */
     public static void setSlimeUseCount(int count) {
         slimeUseCount = count;

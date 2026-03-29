@@ -13,8 +13,8 @@
   "tooltip.tokorotenslime.use_mode": "Mode: %s",
   "tooltip.tokorotenslime.mining_mode": "Mining Mode: %s",
 
-  "advancements.tokorotenslime.get_slime.description": "Strenght is not a force, it's a state of being",
-  "advancements.tokorotenslime.get_slime.title": "Lurking in the shadows, hunthing in the shadows",
+  "advancements.tokorotenslime.get_slime.description": "Strength is not a force, it's a state of being",
+  "advancements.tokorotenslime.get_slime.title": "Lurking in the shadows, hunting in the shadows",
 
   "command.tokorotenslime.reset_slime_count": "Slime proficiency has been reset!",
   "command.tokorotenslime.set_slime_count": "Slime proficiency set to %s!",

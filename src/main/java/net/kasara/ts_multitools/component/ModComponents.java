@@ -11,10 +11,6 @@ import net.minecraft.util.Identifier;
 import java.util.UUID;
 import java.util.function.UnaryOperator;
 
-/**
- * Mod 内で利用するカスタム Data Component を登録・定義するクラス。
- * 各コンポーネントはアイテムやエンティティの追加データとして保存・同期される。
- */
 public class ModComponents {
 
     // 使用モード / 採掘モードを記録するコンポーネント
@@ -33,22 +29,13 @@ public class ModComponents {
     public static final ComponentType<UUID> SLIME_UUID =
             register("slime_uuid", builder -> builder.codec(Codec.STRING.xmap(UUID::fromString, UUID::toString)));
 
-    /**
-     * コンポーネントを Registry に登録する共通メソッド。
-     *
-     * @param name             コンポーネント名
-     * @param builderOperator  コンポーネントの構築処理
-     * @return 登録済みの ComponentType
-     */
     private static <T> ComponentType<T> register(String name, UnaryOperator<ComponentType.Builder<T>> builderOperator) {
-        ComponentType.Builder<T> builder = ComponentType.<T>builder();
         return Registry.register(Registries.DATA_COMPONENT_TYPE, Identifier.of(TSMultitools.MOD_ID, name),
-                builderOperator.apply(builder).build());
+                builderOperator.apply(ComponentType.builder()).build());
     }
 
     /**
-     * コンポーネントの登録処理を初期化時に呼び出す。
-     * 実際の登録は register メソッドを通じて行われる。
+     * コンポーネントの登録処理を初期化時に呼び出す
      */
     public static void registerDataComponentTypes() {
         TSMultitools.LOGGER.info("Registering addon Data Component Types for "+ TokorotenSlimeAPI.getModId() +" (from " + TSMultitools.MOD_ID + ")");

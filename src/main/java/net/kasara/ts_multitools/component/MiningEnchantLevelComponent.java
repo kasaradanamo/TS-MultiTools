@@ -3,11 +3,13 @@ package net.kasara.ts_multitools.component;
 import com.mojang.serialization.Codec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
 
+/**
+ * スライムツールの幸運、シルクタッチエンチャントレベルを保持するコンポーネント
+ */
 public record MiningEnchantLevelComponent(int fortuneLevel, int silkTouchLevel) {
 
     public static final MiningEnchantLevelComponent DEFAULT = new MiningEnchantLevelComponent(3, 1);
 
-    // データのシリアライズ/デシリアライズ用 Codec
     public static final Codec<MiningEnchantLevelComponent> CODEC = RecordCodecBuilder.create(instance ->
             instance.group(
                     Codec.INT.fieldOf("fortune").forGetter(MiningEnchantLevelComponent::fortuneLevel),

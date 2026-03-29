@@ -6,12 +6,11 @@ import net.kasara.ts_multitools.client.SlimeStateClientHandler;
 import net.kasara.ts_multitools.component.MiningEnchantLevelComponent;
 import net.kasara.ts_multitools.component.ModComponents;
 import net.kasara.ts_multitools.component.SlimeModeComponent;
-import net.kasara.ts_multitools.entity.ModEntities;
 import net.kasara.ts_multitools.entity.SlimeArrowEntity;
 import net.kasara.ts_multitools.server.SlimeUseCountManager;
 import net.kasara.ts_multitools.util.ModTags;
 import net.kasara.ts_multitools.util.OffhandTriggerTracker;
-import net.kasara.ts_multitools.server.handler.ToolRightClickHandler;
+import net.kasara.ts_multitools.server.ToolRightClickHandler;
 import net.minecraft.block.BlockState;
 import net.minecraft.component.DataComponentTypes;
 import net.minecraft.component.type.TooltipDisplayComponent;
@@ -33,26 +32,18 @@ import net.minecraft.text.Text;
 import net.minecraft.util.*;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.World;
-import org.jetbrains.annotations.NotNull;
 
 import java.util.List;
+import java.util.UUID;
 import java.util.function.Consumer;
 
 import static net.kasara.ts_multitools.util.MultiToolUtil.applyMultiToolSettings;
 
 /**
- * カスタムスライムアイテム。
- * - 弓/BowItem をベースにした多機能アイテム。
- * - ツールモードと弓モードを切り替えて使用できる。
- * - 使用回数に応じて経験値を消費する仕組みを持つ。
+ * スライムアイテム
  */
 public class SlimeItem  extends BowItem {
 
-    /**
-     * コンストラクタ：ツール性能やデフォルトコンポーネントを設定。
-     * - スタック不可 / 火耐性 / レア度EPIC
-     * - slime_state, slime_mode, mining_enchant を初期付与
-     */
     public SlimeItem(ToolMaterial material, Settings settings) {
         super(applyMultiToolSettings(
                 material,
@@ -63,16 +54,28 @@ public class SlimeItem  extends BowItem {
                         .component(ModComponents.SLIME_STATE, "slime")
                         .component(ModComponents.SLIME_MODE, SlimeModeComponent.DEFAULT)
                         .component(ModComponents.MINING_ENCHANT_LEVEL, MiningEnchantLevelComponent.DEFAULT),
-                ModTags.Blocks.SLIME_MINEABLE,
-                3,                  // 攻撃力 (バニラ剣と同じ)
+                ModTags.Blocks.SLIME_MINEABLE,  // 採掘できるブロックタグ
+                3,                              // 攻撃力 (バニラ剣と同じ)
                 -2.4F                           // 攻撃速度（バニラ剣と同じ）
         ));
     }
 
     /**
+     * アイテムスタックができるときにUUIDを付与
+     */
+    @Override
+    public ItemStack getDefaultStack() {
+        ItemStack stack = super.getDefaultStack();
+        if (!stack.contains(ModComponents.SLIME_UUID)) {
+            stack.set(ModComponents.SLIME_UUID, UUID.randomUUID());
+        }
+        return stack;
+    }
+
+    /**
      * ブロック右クリック時の挙動。
-     * - ツールモード時：ToolRightClickHandler に処理を委譲し、XP消費/使用回数加算。
-     * - それ以外：オフハンドの状態（松明やストレージボックス持ち）に応じて処理を制御。
+     * tool → ツールの右クリックを適応して、XP消費/使用回数加算
+     * bow → オフハンドの状態（松明やストレージボックス持ち）に応じて処理を制御
      */
     @Override
     public ActionResult useOnBlock(ItemUsageContext context) {
@@ -113,10 +116,7 @@ public class SlimeItem  extends BowItem {
     }
 
     /**
-     * アイテム使用開始時の処理（右クリック押しっぱなし）。
-     * - 弓モード時のみ発動。
-     * - ツールモード or XP不足なら FAIL を返す。
-     * - オフハンド優先時はメインハンドを無効化。
+     * アイテム使用開始時の処理（右クリック押しっぱなし）
      */
     @Override
     public ActionResult use(World world, PlayerEntity user, Hand hand) {
@@ -139,9 +139,7 @@ public class SlimeItem  extends BowItem {
     }
 
     /**
-     * 弓の使用終了（離した瞬間）の処理。
-     * - プル時間に応じて矢を生成・発射。
-     * - 発射音の再生 / 使用回数加算 / XP消費。
+     * 弓の使用終了（離した瞬間）の処理
      */
     @Override
     public boolean onStoppedUsing(ItemStack stack, World world, LivingEntity user, int remainingUseTicks) {
@@ -164,31 +162,28 @@ public class SlimeItem  extends BowItem {
         }
 
         // 発射音を再生
-
         world.playSound(null, player.getX(), player.getY(), player.getZ(),
                 SoundEvents.ENTITY_ARROW_SHOOT, SoundCategory.PLAYERS,
                 1.0F, 1.0F / (world.getRandom().nextFloat() * 0.4F + 1.2F) + pullProgress * 0.5F);
 
-        SlimeUseCountManager.increment(player);                          // 使用回数加算
-        shouldConsumeXP(player);                                      // XP消費判定
+        SlimeUseCountManager.increment(player);                        // 使用回数加算
+        shouldConsumeXP(player);                                       // XP消費判定
         player.incrementStat(Stats.USED.getOrCreateStat(this));   // 使用統計更新
         return true;
     }
 
     /**
-     * カスタム矢エンティティを生成。
-     * - SlimeArrowEntity を返す。
+     * カスタム矢エンティティを生成
      */
     @Override
     protected ProjectileEntity createArrowEntity(World world, LivingEntity shooter, ItemStack weaponStack, ItemStack projectileStack, boolean critical) {
-        SlimeArrowEntity arrow = new SlimeArrowEntity(ModEntities.SLIME_ARROW, shooter, world, projectileStack, weaponStack);
+        SlimeArrowEntity arrow = new SlimeArrowEntity(world, shooter, projectileStack, weaponStack);
         arrow.setCritical(critical);    // フルチャージならクリティカル
         return arrow;
     }
 
     /**
-     * ブロック破壊後の処理。
-     * - 使用回数加算 & XP消費。
+     * ブロック破壊後の処理
      */
     @Override
     public boolean postMine(ItemStack stack, World world, BlockState state, BlockPos pos, LivingEntity miner) {
@@ -199,14 +194,13 @@ public class SlimeItem  extends BowItem {
     }
 
     /**
-     * 攻撃ヒット後の処理。
-     * - 使用回数加算 & XP消費。
+     * 攻撃ヒット後の処理
      */
     @Override
     public void postHit(ItemStack stack, LivingEntity target, LivingEntity attacker) {
         if (attacker instanceof PlayerEntity player) {
             SlimeUseCountManager.increment(player);    // 使用回数加算
-            shouldConsumeXP(player);                // XP消費判定
+            shouldConsumeXP(player);                   // XP消費判定
             super.postHit(stack, target, attacker);
         }
     }
@@ -225,14 +219,13 @@ public class SlimeItem  extends BowItem {
     }
 
     /**
-     * エンチャント可能かどうかを判定。
-     * - Unbreaking, Mending, Infinity は除外。
+     * エンチャント可能かどうかを判定
+     * Unbreaking(耐久), Mending(修繕), Infinity(無限) は除外
      */
     @Override
-    public boolean canBeEnchantedWith(@NotNull ItemStack stack, @NotNull RegistryEntry<Enchantment> enchantment, @NotNull EnchantingContext context) {
+    public boolean canBeEnchantedWith(ItemStack stack, RegistryEntry<Enchantment> enchantment, EnchantingContext context) {
         if (!super.canBeEnchantedWith(stack, enchantment, context)) return false;
 
-        // 除外するエンチャント（耐久・修繕・無限）
         return !enchantment.matchesKey(Enchantments.UNBREAKING) &&
                 !enchantment.matchesKey(Enchantments.MENDING) &&
                 !enchantment.matchesKey((Enchantments.INFINITY));
@@ -240,9 +233,9 @@ public class SlimeItem  extends BowItem {
 
     /**
      * ツールチップの追加表示。
-     * - 使用回数
-     * - マイニングモード（fortune/silk_touch）
-     * - 使用モード（bow/tool）
+     * 使用回数
+     * マイニングモード（fortune/silk_touch）
+     * 使用モード（bow/tool）
      */
     @Override
     public void appendTooltip(ItemStack stack, TooltipContext context, TooltipDisplayComponent displayComponent, Consumer<Text> textConsumer, TooltipType type) {
@@ -279,11 +272,11 @@ public class SlimeItem  extends BowItem {
     private void shouldConsumeXP(PlayerEntity player) {
         if (player.getEntityWorld().isClient()) return; // クライアント側なら何もしない
 
-        int count = SlimeUseCountManager.get(player);  // 使用回数を取得
+        int count = SlimeUseCountManager.get(player);                       // 使用回数を取得
         double probability = Math.max(1.0 - (count / 50000.0) * 0.8, 0.2);  // 使用回数に応じたXP消費率
 
         boolean consume = player.getEntityWorld().random.nextDouble() < probability;
 
-        if(consume) player.addExperience(-1);    // 一定確率で経験値消費
+        if(consume) player.addExperience(-1);                               // 一定確率で経験値消費
     }
 }

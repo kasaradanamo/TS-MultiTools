@@ -4,16 +4,11 @@ import net.kasara.ts_multitools.util.ModTags;
 import net.minecraft.item.ToolMaterial;
 
 /**
- * ModToolMaterials クラス
  * カスタムツール素材を定義するクラス
- * SlimeItemで使用されるツール素材のパラメータを保持する
  */
 public class ModToolMaterials {
 
-    /**
-     * スライム素材のツール素材設定
-     * このツール素材はスライム用のアイテム・ツールで使用される
-     */
+    // スライム素材のツール素材設定
     public static ToolMaterial SLIME = new ToolMaterial(
             ModTags.Blocks.INCORRECT_FOR_SLIME, // 採掘可能ブロックのタグ
             1,                                  // 耐久値（スライムにはないため1にしてる）

@@ -6,7 +6,7 @@ import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
 import net.minecraft.server.network.ServerPlayerEntity;
 import net.minecraft.server.world.ServerWorld;
-import org.jetbrains.annotations.Nullable;
+import org.jspecify.annotations.Nullable;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.injection.At;
@@ -17,27 +17,18 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 import java.util.function.Consumer;
 
 /**
- * ItemStackMixin クラス
- * ItemStack の特定メソッドに対して Mixin を適用
- * SlimeItem 専用の耐久無効化や弓判定を追加する
+ * SlimeItem専用の耐久無効化
+ * SlimeItemを弓判定する
  */
 @Mixin(ItemStack.class)
 public abstract class ItemStackMixin {
 
-    /** 元の ItemStack.getItem() メソッドを呼び出すための Shadow */
     @Shadow
     public abstract Item getItem();
 
     /**
-     * SlimeItem の耐久消費を無効化
-     *
-     * damage メソッド実行前にチェックし、SlimeItem ならキャンセルする
-     *
-     * @param amount ダメージ量
-     * @param world サーバーワールド
-     * @param player ダメージ対象のプレイヤー（nullの可能性あり）
-     * @param breakCallback 耐久0時のコールバック
-     * @param ci Mixin 用 CallbackInfo
+     * SlimeItemの耐久消費を無効化
+     * damageメソッド実行前にチェックし、SlimeItemならキャンセルする
      */
     @Inject(
             method = "damage(ILnet/minecraft/server/world/ServerWorld;Lnet/minecraft/server/network/ServerPlayerEntity;Ljava/util/function/Consumer;)V",
@@ -51,13 +42,7 @@ public abstract class ItemStackMixin {
     }
 
     /**
-     * SlimeItem を弓として扱う判定のフック
-     *
-     * ItemStack.isOf(Item) の返り値を改変
-     * 弓判定が false でも、SlimeItem なら true に変更
-     *
-     * @param item 判定対象の Item
-     * @param cir Mixin 用 CallbackInfoReturnable<Boolean>
+     * SlimeItemを弓として扱う
      */
     @Inject(
             method = "isOf(Lnet/minecraft/item/Item;)Z",

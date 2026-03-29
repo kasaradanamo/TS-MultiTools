@@ -11,20 +11,17 @@ import net.minecraft.server.command.CommandManager;
 import net.minecraft.server.network.ServerPlayerEntity;
 import net.minecraft.text.Text;
 
-/**
- * カスタムコマンドの登録クラス
- *
- * /slimecount reset - 使用回数をリセット
- * /slimecount set <数値> - 使用回数を指定した値に設定
- */
 public class ModCommand {
 
     public static void register() {
         CommandRegistrationCallback.EVENT.register((dispatcher, registryAccess, environment) -> {
 
             // "slimecount" コマンドのルート定義
+            // /slimecount reset - 使用回数をリセット
+            // /slimecount set <数値> - 使用回数を指定した値に設定
             dispatcher.register(
                     CommandManager.literal("slimecount")
+                            // ゲームマスターレベルに制限
                             .requires(CommandManager.requirePermissionLevel(
                                     new PermissionCheck.Require(DefaultPermissions.GAMEMASTERS)
                             ))
@@ -39,8 +36,8 @@ public class ModCommand {
                                         // 使用回数をリセット
                                         SlimeUseCountManager.reset(player);
 
-                                        // プレイヤーに通知メッセージ送信
-                                        player.sendMessage(Text.translatable("command.tokorotenslime.reset_slime_count"), false);
+                                        // サーバーに通知メッセージ送信
+                                        context.getSource().sendFeedback(() -> Text.translatable("command.tokorotenslime.reset_slime_count"), true);
                                         return 1; // 成功を返す
                                     })
                             )
@@ -59,8 +56,8 @@ public class ModCommand {
                                                 // 使用回数を指定値に設定
                                                 SlimeUseCountManager.set(player, count);
 
-                                                // プレイヤーに通知メッセージ送信
-                                                player.sendMessage(Text.translatable("command.tokorotenslime.set_slime_count", count), false);
+                                                // サーバーに通知メッセージ送信
+                                                context.getSource().sendFeedback(() -> Text.translatable("command.tokorotenslime.set_slime_count", count), true);
                                                 return 1; // 成功を返す
                                             })
                                     )
@@ -68,7 +65,7 @@ public class ModCommand {
             );
         });
 
-        // ログに出力（MODロード時の確認用）
+        // ログ出力
         TSMultitools.LOGGER.info("Registering addon Commands for "+ TokorotenSlimeAPI.getModId() +" (from " + TSMultitools.MOD_ID + ")");
     }
 }
