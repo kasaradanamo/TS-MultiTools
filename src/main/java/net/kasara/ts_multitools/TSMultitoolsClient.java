@@ -2,11 +2,11 @@ package net.kasara.ts_multitools;
 
 import net.fabricmc.api.ClientModInitializer;
 import net.kasara.ts_multitools.client.ModClientEvents;
-import net.kasara.ts_multitools.client.ModPedestalRenderers;
-import net.kasara.ts_multitools.entity.ModEntities;
-import net.kasara.ts_multitools.client.render.entity.SlimeArrowRenderer;
-import net.kasara.ts_multitools.network.ModPackets;
 import net.kasara.ts_multitools.client.option.ModKeyBindings;
+import net.kasara.ts_multitools.client.render.block.ModPedestalRenderers;
+import net.kasara.ts_multitools.client.render.entity.SlimeArrowRenderer;
+import net.kasara.ts_multitools.entity.ModEntities;
+import net.kasara.ts_multitools.network.ModPackets;
 import net.minecraft.client.render.entity.EntityRendererFactories;
 
 public class TSMultitoolsClient implements ClientModInitializer {

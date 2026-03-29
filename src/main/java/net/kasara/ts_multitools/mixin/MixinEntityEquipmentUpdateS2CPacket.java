@@ -17,21 +17,14 @@ import java.util.ListIterator;
 import java.util.UUID;
 
 /**
- * この Mixin は、EntityEquipmentUpdateS2CPacket のコンストラクタ呼び出し時に
- * サーバーで管理している SLIME アイテムの state をクライアントに正しく反映させるための処理。
- *
- * 目的:
- * - サーバーの元の ItemStack を書き換えずに、パケット内の ItemStack をコピーして state を更新する
- * - クライアントが SLIME の見た目を正しい state で受け取るようにする
+ * SLIMEのパケット送信の際、SLIMEが入っていた場合、
+ * 別で保存してるデータを差し込んだSLIMEに偽造する
  */
 @Mixin(EntityEquipmentUpdateS2CPacket.class)
 public class MixinEntityEquipmentUpdateS2CPacket {
 
     /**
-     * EntityEquipmentUpdateS2CPacket のコンストラクタに対して後処理を注入
-     * @param entityId パケット対象のエンティティID
-     * @param list パケットに入る (EquipmentSlot, ItemStack) のリスト
-     * @param ci Mixin のコールバック情報
+     * EntityEquipmentUpdateS2CPacketのコンストラクタに対して後処理を注入
      */
     @Inject(method = "<init>(ILjava/util/List;)V", at = @At("TAIL"))
     private void onConstruct(int entityId, List<Pair<EquipmentSlot, ItemStack>> list, CallbackInfo ci) {

@@ -14,10 +14,8 @@ import net.minecraft.server.network.ServerPlayerEntity;
  */
 public class SlimeUseCountManager {
 
-    /** プレイヤーNBT内で使用回数を保存するキー名 */
+    // プレイヤーNBT内で使用回数を保存するキー名
     private static final String SLIME_USE_COUNT = "slime_use_count";
-
-    private SlimeUseCountManager() {}
 
     /**
      * プレイヤーに保存されているスライム使用回数を取得
@@ -88,4 +86,6 @@ public class SlimeUseCountManager {
         NbtCompound nbt = TokorotenSlimeAPI.getAddonData(player, TSMultitools.MOD_ID);
         return nbt.contains(SLIME_USE_COUNT);
     }
+
+    private SlimeUseCountManager() {}
 }

@@ -1,19 +1,3 @@
 {
-  "type": "tokorotenslime:crafting_slime",
-  "category": "equipment",
-  "ingredients": [
-    "minecraft:netherite_pickaxe",
-    "minecraft:netherite_axe",
-    "minecraft:netherite_shovel",
-    "minecraft:netherite_hoe",
-    "minecraft:netherite_sword",
-    "minecraft:bow",
-    "minecraft:nether_star",
-    "minecraft:slime_ball",
-    "minecraft:slime_ball"
-  ],
-  "result": {
-    "id": "tokorotenslime:slime",
-    "count": 1
-  }
+  "type": "tokorotenslime:crafting_slime"
 }

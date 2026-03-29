@@ -6,7 +6,6 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.UUID;
 
-
 /**
  * プレイヤーのオフハンドトリガー状態を管理するユーティリティ
  * オフハンド操作を行ったかどうかを一時的に記録する
@@ -18,6 +17,7 @@ public class OffhandTriggerTracker {
 
     /**
      * 指定プレイヤーのオフハンドトリガー状態を設定する
+     *
      * @param player 対象プレイヤー
      * @param value true = オフハンド操作あり, false = なし
      */
@@ -27,8 +27,6 @@ public class OffhandTriggerTracker {
 
     /**
      * 指定プレイヤーのオフハンドトリガー状態を取得する
-     * @param player 対象プレイヤー
-     * @return オフハンド操作があったかどうか
      */
     public static boolean get(PlayerEntity player) {
         return TRIGGER_MAP.getOrDefault(player.getUuid(), false);
@@ -36,7 +34,6 @@ public class OffhandTriggerTracker {
 
     /**
      * 指定プレイヤーのオフハンドトリガー状態をクリアする
-     * @param player 対象プレイヤー
      */
     public static void clear(PlayerEntity player) {
         TRIGGER_MAP.remove(player.getUuid());

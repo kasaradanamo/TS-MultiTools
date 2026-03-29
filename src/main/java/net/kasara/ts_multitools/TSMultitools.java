@@ -1,13 +1,12 @@
 package net.kasara.ts_multitools;
 
 import net.fabricmc.api.ModInitializer;
-
 import net.kasara.ts_multitools.command.ModCommand;
 import net.kasara.ts_multitools.component.ModComponents;
 import net.kasara.ts_multitools.entity.ModEntities;
 import net.kasara.ts_multitools.item.ModItems;
 import net.kasara.ts_multitools.network.ModPackets;
-import net.kasara.ts_multitools.recipe.ModRecipes;
+import net.kasara.ts_multitools.recipe.ModRecipeSerializers;
 import net.kasara.ts_multitools.server.ModServerEvents;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -25,7 +24,7 @@ public class TSMultitools implements ModInitializer {
 
         ModEntities.registerModEntities();  // エンティティ登録
 
-        ModRecipes.register();  // レシピ登録
+        ModRecipeSerializers.register();  // レシピシリアライザー登録
 
         ModCommand.register();	// コマンド登録
 

@@ -6,13 +6,12 @@ import net.minecraft.enchantment.EnchantmentHelper;
 import net.minecraft.item.ItemStack;
 import net.minecraft.util.math.random.Random;
 import org.spongepowered.asm.mixin.Mixin;
-import org.spongepowered.asm.mixin.injection.*;
+import org.spongepowered.asm.mixin.injection.Constant;
+import org.spongepowered.asm.mixin.injection.ModifyConstant;
 
 import java.util.stream.Stream;
 
 /**
- * EnchantmentHelperMixin クラス
- * EnchantmentHelper の generateEnchantments メソッドに対して Mixin を適用
  * 特定アイテム（SlimeItem, MultitoolItem）のエンチャント生成閾値を調整する
  */
 @Mixin(EnchantmentHelper.class)
@@ -20,15 +19,7 @@ public class EnchantmentHelperMixin {
 
     /**
      * generateEnchantments メソッド内の while ループ閾値を変更
-     *
      * バニラでは 50 が閾値になっているが、SlimeItem や MultitoolItem 用に調整
-     *
-     * @param original 元の閾値（デフォルトは 50）
-     * @param random ランダム生成用
-     * @param stack 対象のアイテムスタック
-     * @param level エンチャントレベル
-     * @param possibleEnchantments 生成候補のストリーム
-     * @return 修正後の閾値
      */
     @ModifyConstant(
             method = "generateEnchantments(Lnet/minecraft/util/math/random/Random;Lnet/minecraft/item/ItemStack;ILjava/util/stream/Stream;)Ljava/util/List;",
