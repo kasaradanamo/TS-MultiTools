@@ -1,12 +1,15 @@
 {
 	"required": true,
 	"package": "net.kasara.ts_multitools.mixin",
-	"compatibilityLevel": "JAVA_21",
+	"compatibilityLevel": "JAVA_25",
 	"mixins": [
 		"ItemStackMixin",
 		"EnchantmentHelperMixin",
-        "MixinEntityEquipmentUpdateS2CPacket"
+        "MixinClientboundSetEquipmentPacket"
 	],
+    "client": [
+        "client.AbstractClientPlayerMixin"
+    ],
 	"injectors": {
 		"defaultRequire": 1
 	},
