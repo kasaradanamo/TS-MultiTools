@@ -2,9 +2,11 @@ package net.kasara.ts_multitools.mixin;
 
 import net.kasara.ts_multitools.item.MultitoolItem;
 import net.kasara.ts_multitools.item.SlimeItem;
-import net.minecraft.enchantment.EnchantmentHelper;
-import net.minecraft.item.ItemStack;
-import net.minecraft.util.math.random.Random;
+import net.minecraft.core.Holder;
+import net.minecraft.util.RandomSource;
+import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.item.enchantment.Enchantment;
+import net.minecraft.world.item.enchantment.EnchantmentHelper;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.injection.*;
 
@@ -21,10 +23,13 @@ public class EnchantmentHelperMixin {
      * バニラでは 50 が閾値になっているが、SlimeItem や MultitoolItem 用に調整
      */
     @ModifyConstant(
-            method = "generateEnchantments(Lnet/minecraft/util/math/random/Random;Lnet/minecraft/item/ItemStack;ILjava/util/stream/Stream;)Ljava/util/List;",
-            constant = @Constant(intValue = 50)
+            method = "selectEnchantment(Lnet/minecraft/util/RandomSource;Lnet/minecraft/world/item/ItemStack;ILjava/util/stream/Stream;)Ljava/util/List;",
+            constant = @Constant(intValue = 50),
+            slice = @Slice(
+                    from = @At(value = "INVOKE", target = "Lnet/minecraft/util/random/WeightedRandom;getRandomItem(Lnet/minecraft/util/RandomSource;Ljava/util/List;Ljava/util/function/ToIntFunction;)Ljava/util/Optional;")
+            )
     )
-    private static int modifyWhileThreshold(int original, Random random, ItemStack stack, int level, Stream<?> possibleEnchantments) {
+    private static int modifyWhileThreshold(int original, RandomSource random, ItemStack stack, int level, Stream<Holder<Enchantment>> source) {
         // SlimeItem は閾値を低くして簡単にエンチャント生成
         if (stack.getItem() instanceof SlimeItem) {
             return 4;

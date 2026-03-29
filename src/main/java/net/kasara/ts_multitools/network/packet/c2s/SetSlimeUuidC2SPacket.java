@@ -3,35 +3,35 @@ package net.kasara.ts_multitools.network.packet.c2s;
 import net.fabricmc.fabric.api.client.networking.v1.ClientPlayNetworking;
 import net.kasara.ts_multitools.TSMultitools;
 import net.kasara.ts_multitools.server.SlimeUuidServerManager;
-import net.minecraft.network.RegistryByteBuf;
-import net.minecraft.network.codec.PacketCodec;
-import net.minecraft.network.codec.PacketCodecs;
-import net.minecraft.network.packet.CustomPayload;
-import net.minecraft.server.network.ServerPlayerEntity;
-import net.minecraft.util.Identifier;
-import net.minecraft.util.Uuids;
+import net.minecraft.core.UUIDUtil;
+import net.minecraft.network.RegistryFriendlyByteBuf;
+import net.minecraft.network.codec.ByteBufCodecs;
+import net.minecraft.network.codec.StreamCodec;
+import net.minecraft.network.protocol.common.custom.CustomPacketPayload;
+import net.minecraft.resources.Identifier;
+import net.minecraft.server.level.ServerPlayer;
 
 import java.util.UUID;
 
 /**
  * サーバー側にuuidをセットさせる
  */
-public record SetSlimeUuidC2SPacket(UUID uuid, int slot) implements CustomPayload{
+public record SetSlimeUuidC2SPacket(UUID uuid, int slot) implements CustomPacketPayload {
 
-    public static final CustomPayload.Id<SetSlimeUuidC2SPacket> ID =
-            new CustomPayload.Id<>(Identifier.of(TSMultitools.MOD_ID, "set_slime_uuid"));
+    public static final CustomPacketPayload.Type<SetSlimeUuidC2SPacket> ID =
+            new CustomPacketPayload.Type<>(Identifier.fromNamespaceAndPath(TSMultitools.MOD_ID, "set_slime_uuid"));
 
-    public static final PacketCodec<RegistryByteBuf, SetSlimeUuidC2SPacket> CODEC =
-            PacketCodec.tuple(
-                    Uuids.PACKET_CODEC,
+    public static final StreamCodec<RegistryFriendlyByteBuf, SetSlimeUuidC2SPacket> CODEC =
+            StreamCodec.composite(
+                    UUIDUtil.STREAM_CODEC,
                     SetSlimeUuidC2SPacket::uuid,
-                    PacketCodecs.INTEGER,
+                    ByteBufCodecs.INT,
                     SetSlimeUuidC2SPacket::slot,
                     SetSlimeUuidC2SPacket::new
             );
 
     @Override
-    public CustomPayload.Id<? extends CustomPayload> getId() {
+    public CustomPacketPayload.Type<? extends CustomPacketPayload> type() {
         return ID;
     }
 
@@ -39,7 +39,7 @@ public record SetSlimeUuidC2SPacket(UUID uuid, int slot) implements CustomPayloa
         ClientPlayNetworking.send(new SetSlimeUuidC2SPacket(uuid, slot));
     }
 
-    public static void receive(SetSlimeUuidC2SPacket packet, ServerPlayerEntity player) {
+    public static void receive(SetSlimeUuidC2SPacket packet, ServerPlayer player) {
         SlimeUuidServerManager.setSlimeUuid(player, packet.uuid(), packet.slot());
     }
 }

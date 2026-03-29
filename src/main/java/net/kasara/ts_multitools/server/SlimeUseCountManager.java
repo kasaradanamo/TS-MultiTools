@@ -3,11 +3,11 @@ package net.kasara.ts_multitools.server;
 import net.kasara.tokorotenslime.api.TokorotenSlimeAPI;
 import net.kasara.ts_multitools.TSMultitools;
 import net.kasara.ts_multitools.network.packet.s2c.SlimeUseCountS2CPacket;
-import net.minecraft.component.DataComponentTypes;
-import net.minecraft.component.type.NbtComponent;
-import net.minecraft.entity.player.PlayerEntity;
-import net.minecraft.nbt.NbtCompound;
-import net.minecraft.server.network.ServerPlayerEntity;
+import net.minecraft.core.component.DataComponents;
+import net.minecraft.nbt.CompoundTag;
+import net.minecraft.server.level.ServerPlayer;
+import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.item.component.CustomData;
 
 /**
  * スライム使用回数を制御する
@@ -21,19 +21,19 @@ public class SlimeUseCountManager {
      * プレイヤーに保存されているスライム使用回数を取得
      * データが存在しない場合は0を返す
      */
-    public static int get(PlayerEntity player) {
-        NbtCompound nbt = TokorotenSlimeAPI.getAddonData(player, TSMultitools.MOD_ID);
+    public static int get(Player player) {
+        CompoundTag nbt = TokorotenSlimeAPI.getAddonData(player, TSMultitools.MOD_ID);
         return nbt.getInt(SLIME_USE_COUNT).orElse(0);
     }
 
     /**
      * プレイヤーのスライム使用回数を設定する
      */
-    public static void set(PlayerEntity player, int count) {
-        NbtCompound nbt = TokorotenSlimeAPI.getAddonData(player, TSMultitools.MOD_ID);
+    public static void set(Player player, int count) {
+        CompoundTag nbt = TokorotenSlimeAPI.getAddonData(player, TSMultitools.MOD_ID);
         nbt.putInt(SLIME_USE_COUNT, count);
 
-        if(player instanceof ServerPlayerEntity serverPlayer) {
+        if(player instanceof ServerPlayer serverPlayer) {
             TokorotenSlimeAPI.writeAddonData(serverPlayer, TSMultitools.MOD_ID, nbt);
             SlimeUseCountS2CPacket.send(serverPlayer, count);   // クライアントに同期
         }
@@ -42,14 +42,14 @@ public class SlimeUseCountManager {
     /**
      * スライム使用回数を1増加させる
      */
-    public static void increment(PlayerEntity player) {
+    public static void increment(Player player) {
         set(player, get(player) + 1);
     }
 
     /**
      * スライム使用回数を0にリセットする
      */
-    public static void reset(PlayerEntity player) {
+    public static void reset(Player player) {
         set(player, 0);
     }
 
@@ -60,7 +60,7 @@ public class SlimeUseCountManager {
      * @param oldPlayer コピー元プレイヤー
      * @param newPlayer コピー先プレイヤー
      */
-    public static void copyFrom(PlayerEntity oldPlayer, PlayerEntity newPlayer) {
+    public static void copyFrom(Player oldPlayer, Player newPlayer) {
         set(newPlayer, get(oldPlayer));
     }
 
@@ -68,13 +68,13 @@ public class SlimeUseCountManager {
      * 旧保存形式（CUSTOM_DATA 内）から現在のアドオンNBT形式へ移行する
      * 既に新形式のデータが存在する場合は何もしない
      */
-    public static void migrateIfNeeded(PlayerEntity player) {
+    public static void migrateIfNeeded(Player player) {
         if (has(player)) return;
 
-        NbtComponent oldData = player.get(DataComponentTypes.CUSTOM_DATA);
+        CustomData oldData = player.get(DataComponents.CUSTOM_DATA);
         if (oldData == null) return;
 
-        NbtCompound oldCompound = oldData.copyNbt();
+        CompoundTag oldCompound = oldData.copyTag();
         if (!oldCompound.contains(SLIME_USE_COUNT)) return;
 
         int oldCount = oldCompound.getInt(SLIME_USE_COUNT).orElse(0);
@@ -82,8 +82,8 @@ public class SlimeUseCountManager {
     }
 
     // 新形式のアドオンNBTに使用回数が存在するか確認
-    private static boolean has(PlayerEntity player) {
-        NbtCompound nbt = TokorotenSlimeAPI.getAddonData(player, TSMultitools.MOD_ID);
+    private static boolean has(Player player) {
+        CompoundTag nbt = TokorotenSlimeAPI.getAddonData(player, TSMultitools.MOD_ID);
         return nbt.contains(SLIME_USE_COUNT);
     }
 

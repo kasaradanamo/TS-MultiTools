@@ -2,32 +2,33 @@ package net.kasara.ts_multitools.entity;
 
 import net.kasara.tokorotenslime.api.TokorotenSlimeAPI;
 import net.kasara.ts_multitools.TSMultitools;
-import net.minecraft.entity.Entity;
-import net.minecraft.entity.EntityType;
-import net.minecraft.entity.SpawnGroup;
-import net.minecraft.registry.Registries;
-import net.minecraft.registry.Registry;
-import net.minecraft.registry.RegistryKey;
-import net.minecraft.util.Identifier;
+import net.minecraft.core.Registry;
+import net.minecraft.core.registries.BuiltInRegistries;
+import net.minecraft.core.registries.Registries;
+import net.minecraft.resources.Identifier;
+import net.minecraft.resources.ResourceKey;
+import net.minecraft.world.entity.Entity;
+import net.minecraft.world.entity.EntityType;
+import net.minecraft.world.entity.MobCategory;
 
 public class ModEntities {
 
     // スライム矢エンティティのEntityType
     public static final EntityType<SlimeArrowEntity> SLIME_ARROW = registerEntity(
             "slime_arrow",
-            EntityType.Builder.<SlimeArrowEntity>create(SlimeArrowEntity::new, SpawnGroup.MISC)
-                    .dropsNothing()                         // 死亡時にドロップなし
-                    .dimensions(0.5F, 0.5F)     // ヒットボックスの幅・高さ
+            EntityType.Builder.<SlimeArrowEntity>of(SlimeArrowEntity::new, MobCategory.MISC)
+                    .noLootTable()                          // 死亡時にドロップなし
+                    .sized(0.5F, 0.5F)          // ヒットボックスの幅・高さ
                     .eyeHeight(0.13F)                       // 視点の高さ
-                    .maxTrackingRange(4)                    // サーバーとの同期範囲
-                    .trackingTickInterval(20)               // 同期間隔
+                    .clientTrackingRange(4)   // サーバーとの同期範囲
+                    .updateInterval(20)                     // 同期間隔
     );
 
     private static <T extends Entity> EntityType<T> registerEntity(String name, EntityType.Builder<T> builder) {
-        RegistryKey<EntityType<?>> key = RegistryKey.of(Registries.ENTITY_TYPE.getKey(), Identifier.of(TokorotenSlimeAPI.getModId(), name));
+        ResourceKey<EntityType<?>> key = ResourceKey.create(Registries.ENTITY_TYPE, Identifier.fromNamespaceAndPath(TokorotenSlimeAPI.getModId(), name));
         return Registry.register(
-                Registries.ENTITY_TYPE,
-                key.getValue(),
+                BuiltInRegistries.ENTITY_TYPE,
+                key,
                 builder.build(key)
         );
     }

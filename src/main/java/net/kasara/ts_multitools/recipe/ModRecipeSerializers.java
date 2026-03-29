@@ -2,11 +2,11 @@ package net.kasara.ts_multitools.recipe;
 
 import net.kasara.tokorotenslime.api.TokorotenSlimeAPI;
 import net.kasara.ts_multitools.TSMultitools;
-import net.minecraft.recipe.Recipe;
-import net.minecraft.recipe.RecipeSerializer;
-import net.minecraft.registry.Registries;
-import net.minecraft.registry.Registry;
-import net.minecraft.util.Identifier;
+import net.minecraft.core.Registry;
+import net.minecraft.core.registries.BuiltInRegistries;
+import net.minecraft.resources.Identifier;
+import net.minecraft.world.item.crafting.Recipe;
+import net.minecraft.world.item.crafting.RecipeSerializer;
 
 /**
  * レシピシリアライザー登録クラス
@@ -24,8 +24,8 @@ public class ModRecipeSerializers {
     }
 
     private static <T extends Recipe<?>> RecipeSerializer<T> registerRecipeSerializer(String name, RecipeSerializer<T> instance) {
-        return Registry.register(Registries.RECIPE_SERIALIZER,
-                Identifier.of(TokorotenSlimeAPI.getModId(), name),
+        return Registry.register(BuiltInRegistries.RECIPE_SERIALIZER,
+                Identifier.fromNamespaceAndPath(TokorotenSlimeAPI.getModId(), name),
                 instance);
     }
 }
