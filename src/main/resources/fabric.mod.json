@@ -1,15 +1,15 @@
 {
 	"schemaVersion": 1,
-	"id": "ts_multitools",
-	"version": "${version}",
-	"name": "Multi tools",
-	"description": "Add Multi tools to TokorotenSlime.",
+	"id": "${mod_id}",
+	"version": "${mod_version}",
+	"name": "${mod_name}",
+	"description": "Add MultiTools to TokorotenSlime.",
 	"authors": [
 		"Kasara"
 	],
 	"contact": {
 		"homepage": "https://modrinth.com/mod/ts-multitools",
-        "issues": "https://github.com/kasaradanamo/TS-Multitools/issues"
+        "issues": "https://github.com/kasaradanamo/TS-MultiTools/issues"
 	},
 	"license": [
       "Source code: MIT",
@@ -19,13 +19,10 @@
 	"environment": "*",
 	"entrypoints": {
 		"main": [
-			"net.kasara.ts_multitools.TSMultitools"
-		],
-		"fabric-datagen": [
-			"net.kasara.ts_multitools.TSMultitoolsDataGenerator"
+			"net.kasara.ts_multitools.TSMultiTools"
 		],
 		"client": [
-			"net.kasara.ts_multitools.TSMultitoolsClient"
+			"net.kasara.ts_multitools.TSMultiToolsClient"
 		]
 	},
 	"mixins": [
@@ -33,9 +30,9 @@
 	],
 	"depends": {
 		"fabricloader": ">=0.18.4",
-		"minecraft": "~26.1-",
+		"minecraft": "~26.1",
 		"java": ">=25",
 		"fabric-api": "*",
-		"tokorotenslime": ">=1.1.1"
+		"tokorotenslime": ">=1.2"
 	}
 }
