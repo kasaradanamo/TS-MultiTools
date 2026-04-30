@@ -1,7 +1,7 @@
 package net.kasara.ts_multitools.network.packet.c2s;
 
 import net.fabricmc.fabric.api.client.networking.v1.ClientPlayNetworking;
-import net.kasara.ts_multitools.TSMultitools;
+import net.kasara.ts_multitools.TSMultiTools;
 import net.kasara.ts_multitools.server.SlimeModeServerHandler;
 import net.minecraft.core.UUIDUtil;
 import net.minecraft.network.RegistryFriendlyByteBuf;
@@ -13,15 +13,12 @@ import net.minecraft.server.level.ServerPlayer;
 
 import java.util.UUID;
 
-/**
- * SLIMEのモードをサーバーに通知する
- */
 public record ToggleSlimeModeC2SPacket(UUID uuid, String mode) implements CustomPacketPayload {
 
     public static final CustomPacketPayload.Type<ToggleSlimeModeC2SPacket> ID =
-            new CustomPacketPayload.Type<>(Identifier.fromNamespaceAndPath(TSMultitools.MOD_ID, "toggle_slime_mode"));
+            new CustomPacketPayload.Type<>(Identifier.fromNamespaceAndPath(TSMultiTools.MOD_ID, "toggle_slime_mode"));
 
-    public static final StreamCodec<RegistryFriendlyByteBuf, ToggleSlimeModeC2SPacket> CODEC =
+    public static final StreamCodec<RegistryFriendlyByteBuf, ToggleSlimeModeC2SPacket> STREAM_CODEC =
             StreamCodec.composite(
                     UUIDUtil.STREAM_CODEC,
                     ToggleSlimeModeC2SPacket::uuid,

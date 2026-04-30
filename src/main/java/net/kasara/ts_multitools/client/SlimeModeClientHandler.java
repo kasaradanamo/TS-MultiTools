@@ -1,9 +1,8 @@
 package net.kasara.ts_multitools.client;
 
-import net.fabricmc.api.EnvType;
-import net.fabricmc.api.Environment;
 import net.kasara.ts_multitools.component.ModComponents;
 import net.kasara.ts_multitools.component.SlimeModeComponent;
+import net.kasara.ts_multitools.constant.SlimeMode;
 import net.kasara.ts_multitools.item.ModItems;
 import net.kasara.ts_multitools.network.packet.c2s.ToggleSlimeModeC2SPacket;
 import net.kasara.ts_multitools.client.option.ModKeyMappings;
@@ -23,7 +22,6 @@ import java.util.UUID;
 /**
  * クライアント側のモード変更
  */
-@Environment(EnvType.CLIENT)
 public class SlimeModeClientHandler {
 
     // モード切替キーが押下中かどうか（押下判定の連打防止用）
@@ -47,7 +45,7 @@ public class SlimeModeClientHandler {
             boolean ctrlPressed = GLFW.glfwGetKey(minecraft.getWindow().handle(),
                     GLFW.GLFW_KEY_LEFT_CONTROL) == GLFW.GLFW_PRESS;
 
-            ToggleSlimeModeC2SPacket.send(stackUuid, ctrlPressed ? "use_mode" : "mining_mode");
+            ToggleSlimeModeC2SPacket.send(stackUuid, ctrlPressed ? SlimeMode.Type.USE : SlimeMode.Type.MINING);
 
         } else if (!isPressed) {
             // キーが離されてらリセット
@@ -75,7 +73,7 @@ public class SlimeModeClientHandler {
         Level level = Minecraft.getInstance().level;
 
         ItemEnchantments enchants = stack.get(DataComponents.ENCHANTMENTS);
-        if (enchants == null || enchants.isEmpty()) return "default";
+        if (enchants == null || enchants.isEmpty()) return SlimeMode.MiningMode.DEFAULT;
 
         Holder<Enchantment> fortuneHolder = level.registryAccess().lookupOrThrow(Registries.ENCHANTMENT).getOrThrow(Enchantments.FORTUNE);
         Holder<Enchantment> silkTouchHolder = level.registryAccess().lookupOrThrow(Registries.ENCHANTMENT).getOrThrow(Enchantments.SILK_TOUCH);
@@ -83,8 +81,8 @@ public class SlimeModeClientHandler {
         boolean hasFortune = enchants.getLevel(fortuneHolder) > 0;
         boolean hasSilkTouch = enchants.getLevel(silkTouchHolder) > 0;
 
-        if (hasFortune) return "fortune";
-        if (hasSilkTouch) return "silk_touch";
+        if (hasFortune) return SlimeMode.MiningMode.FORTUNE;
+        if (hasSilkTouch) return SlimeMode.MiningMode.SILK_TOUCH;
         return "default";
     }
 }

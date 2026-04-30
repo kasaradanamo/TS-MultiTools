@@ -1,7 +1,7 @@
 package net.kasara.ts_multitools.network.packet.c2s;
 
 import net.fabricmc.fabric.api.client.networking.v1.ClientPlayNetworking;
-import net.kasara.ts_multitools.TSMultitools;
+import net.kasara.ts_multitools.TSMultiTools;
 import net.kasara.ts_multitools.server.SlimeStateServerHandler;
 import net.minecraft.core.UUIDUtil;
 import net.minecraft.network.RegistryFriendlyByteBuf;
@@ -13,15 +13,12 @@ import net.minecraft.server.level.ServerPlayer;
 
 import java.util.UUID;
 
-/**
- * スライムの状態(state)をサーバーに通知する
- */
 public record SlimeStateC2SPacket(UUID uuid, String state) implements CustomPacketPayload {
 
     public static final CustomPacketPayload.Type<SlimeStateC2SPacket> ID =
-            new CustomPacketPayload.Type<>(Identifier.fromNamespaceAndPath(TSMultitools.MOD_ID, "slime_state"));
+            new CustomPacketPayload.Type<>(Identifier.fromNamespaceAndPath(TSMultiTools.MOD_ID, "slime_state"));
 
-    public static final StreamCodec<RegistryFriendlyByteBuf, SlimeStateC2SPacket> CODEC =
+    public static final StreamCodec<RegistryFriendlyByteBuf, SlimeStateC2SPacket> STREAM_CODEC =
             StreamCodec.composite(
                     UUIDUtil.STREAM_CODEC,
                     SlimeStateC2SPacket::uuid,

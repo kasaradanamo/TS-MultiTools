@@ -1,7 +1,7 @@
 package net.kasara.ts_multitools.server;
 
 import net.kasara.tokorotenslime.api.TokorotenSlimeAPI;
-import net.kasara.ts_multitools.TSMultitools;
+import net.kasara.ts_multitools.TSMultiTools;
 import net.kasara.ts_multitools.network.packet.s2c.SlimeUseCountS2CPacket;
 import net.minecraft.core.component.DataComponents;
 import net.minecraft.nbt.CompoundTag;
@@ -22,7 +22,7 @@ public class SlimeUseCountManager {
      * データが存在しない場合は0を返す
      */
     public static int get(Player player) {
-        CompoundTag nbt = TokorotenSlimeAPI.getAddonData(player, TSMultitools.MOD_ID);
+        CompoundTag nbt = TokorotenSlimeAPI.getAddonData(player, TSMultiTools.MOD_ID);
         return nbt.getInt(SLIME_USE_COUNT).orElse(0);
     }
 
@@ -30,11 +30,11 @@ public class SlimeUseCountManager {
      * プレイヤーのスライム使用回数を設定する
      */
     public static void set(Player player, int count) {
-        CompoundTag nbt = TokorotenSlimeAPI.getAddonData(player, TSMultitools.MOD_ID);
+        CompoundTag nbt = TokorotenSlimeAPI.getAddonData(player, TSMultiTools.MOD_ID);
         nbt.putInt(SLIME_USE_COUNT, count);
 
         if(player instanceof ServerPlayer serverPlayer) {
-            TokorotenSlimeAPI.writeAddonData(serverPlayer, TSMultitools.MOD_ID, nbt);
+            TokorotenSlimeAPI.writeAddonData(serverPlayer, TSMultiTools.MOD_ID, nbt);
             SlimeUseCountS2CPacket.send(serverPlayer, count);   // クライアントに同期
         }
     }
@@ -83,7 +83,7 @@ public class SlimeUseCountManager {
 
     // 新形式のアドオンNBTに使用回数が存在するか確認
     private static boolean has(Player player) {
-        CompoundTag nbt = TokorotenSlimeAPI.getAddonData(player, TSMultitools.MOD_ID);
+        CompoundTag nbt = TokorotenSlimeAPI.getAddonData(player, TSMultiTools.MOD_ID);
         return nbt.contains(SLIME_USE_COUNT);
     }
 

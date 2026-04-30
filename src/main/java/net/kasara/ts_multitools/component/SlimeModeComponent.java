@@ -2,18 +2,19 @@ package net.kasara.ts_multitools.component;
 
 import com.mojang.serialization.Codec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
+import net.kasara.ts_multitools.constant.SlimeMode;
 
 /**
  * スライムツールの「使用モード」と「採掘モード」を保持するコンポーネント
  */
 public record SlimeModeComponent(String useMode, String miningMode) {
 
-    public static final SlimeModeComponent DEFAULT = new SlimeModeComponent("bow", "default");
+    public static final SlimeModeComponent DEFAULT = new SlimeModeComponent(SlimeMode.UseMode.BOW, SlimeMode.MiningMode.DEFAULT);
 
     public static final Codec<SlimeModeComponent> CODEC = RecordCodecBuilder.create(instance ->
             instance.group(
-                    Codec.STRING.fieldOf("use_mode").forGetter(SlimeModeComponent::useMode),
-                    Codec.STRING.fieldOf("mining_mode").forGetter(SlimeModeComponent::miningMode)
+                    Codec.STRING.fieldOf(SlimeMode.Type.USE).forGetter(SlimeModeComponent::useMode),
+                    Codec.STRING.fieldOf(SlimeMode.Type.MINING).forGetter(SlimeModeComponent::miningMode)
             ).apply(instance, SlimeModeComponent::new)
     );
 

@@ -1,7 +1,7 @@
 package net.kasara.ts_multitools.item;
 
 import net.kasara.tokorotenslime.api.TokorotenSlimeAPI;
-import net.kasara.ts_multitools.TSMultitools;
+import net.kasara.ts_multitools.TSMultiTools;
 import net.minecraft.core.Registry;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.core.registries.Registries;
@@ -15,35 +15,35 @@ import java.util.function.Function;
 public class ModItems {
 
     // 4ツール、剣、弓の機能が使えるツール
-    public static final Item SLIME = registerAndAddToTab("slime",
+    public static final Item SLIME = registerItemAndAddToTab("slime",
             pros -> new SlimeItem(ModToolMaterials.SLIME, pros));
 
     // 木製マルチツール
-    public static final Item WOODEN_MULTITOOL = registerAndAddToTab("wooden_multitool",
+    public static final Item WOODEN_MULTITOOL = registerItemAndAddToTab("wooden_multitool",
             pros -> new MultitoolItem(ToolMaterial.WOOD, pros));
     // 石製マルチツール
-    public static final Item STONE_MULTITOOL = registerAndAddToTab("stone_multitool",
+    public static final Item STONE_MULTITOOL = registerItemAndAddToTab("stone_multitool",
             pros -> new MultitoolItem(ToolMaterial.STONE, pros));
     // 銅製マルチツール
-    public static final Item COPPER_MULTITOOL = registerAndAddToTab("copper_multitool",
+    public static final Item COPPER_MULTITOOL = registerItemAndAddToTab("copper_multitool",
             pros -> new MultitoolItem(ToolMaterial.COPPER, pros));
     // 鉄製マルチツール
-    public static final Item IRON_MULTITOOL = registerAndAddToTab("iron_multitool",
+    public static final Item IRON_MULTITOOL = registerItemAndAddToTab("iron_multitool",
             pros -> new MultitoolItem(ToolMaterial.IRON, pros));
     // 金製マルチツール
-    public static final Item GOLDEN_MULTITOOL = registerAndAddToTab("golden_multitool",
+    public static final Item GOLDEN_MULTITOOL = registerItemAndAddToTab("golden_multitool",
             pros -> new MultitoolItem(ToolMaterial.GOLD, pros));
     // ダイヤ製マルチツール
-    public static final Item DIAMOND_MULTITOOL = registerAndAddToTab("diamond_multitool",
+    public static final Item DIAMOND_MULTITOOL = registerItemAndAddToTab("diamond_multitool",
             pros -> new MultitoolItem(ToolMaterial.DIAMOND, pros));
     // ネザライト製マルチツール(耐火設定付き)
-    public static final Item NETHERITE_MULTITOOL = registerAndAddToTab("netherite_multitool",
+    public static final Item NETHERITE_MULTITOOL = registerItemAndAddToTab("netherite_multitool",
             pros -> new MultitoolItem(ToolMaterial.NETHERITE, pros.fireResistant()));
 
     // スライムソードのアイコン用アイテム（グループ追加対象外）
-    public static final Item SLIME_SWORD_ICON = registerAndAddToTab("slime_sword_icon", Item::new);
+    public static final Item SLIME_SWORD_ICON = registerItemAndAddToTab("slime_sword_icon", Item::new);
 
-    private static Item registerAndAddToTab(String name, Function<Item.Properties, Item> factory) {
+    private static Item registerItemAndAddToTab(String name, Function<Item.Properties, Item> factory) {
         ResourceKey<Item> key = ResourceKey.create(Registries.ITEM, Identifier.fromNamespaceAndPath(TokorotenSlimeAPI.getModId(), name));
         Item item = Registry.register(
                 BuiltInRegistries.ITEM,
@@ -58,7 +58,7 @@ public class ModItems {
     /**
      * 登録確認用のログを出力するメソッド
      */
-    public static void registerModItems() {
-        TSMultitools.LOGGER.info("Registering addon items for "+ TokorotenSlimeAPI.getModId() +" (from " + TSMultitools.MOD_ID + ")");
+    public static void register() {
+        TSMultiTools.LOGGER.info("Registering addon Mod Items for "+ TokorotenSlimeAPI.getModId() +" (from " + TSMultiTools.MOD_ID + ")");
     }
 }

@@ -2,6 +2,7 @@ package net.kasara.ts_multitools.server;
 
 import net.kasara.ts_multitools.component.ModComponents;
 import net.kasara.ts_multitools.component.SlimeModeComponent;
+import net.kasara.ts_multitools.constant.SlimeMode;
 import net.kasara.ts_multitools.item.ModItems;
 import net.minecraft.ChatFormatting;
 import net.minecraft.core.Holder;
@@ -22,9 +23,6 @@ import java.util.UUID;
  */
 public class SlimeModeServerHandler {
 
-    public static final String USE_BOW = "bow";
-    public static final String USE_TOOL = "tool";
-
     /**
      * SlimeItemの使用モード（弓/ツール）を切り替え
      */
@@ -34,7 +32,7 @@ public class SlimeModeServerHandler {
         if (comp == null) return;
 
         // 現在のモードを反転
-        String newUseMode = comp.useMode().equals(USE_BOW) ? USE_TOOL : USE_BOW;
+        String newUseMode = comp.useMode().equals(SlimeMode.UseMode.BOW) ? SlimeMode.UseMode.TOOL : SlimeMode.UseMode.BOW;
 
         // モードを更新
         stack.set(ModComponents.SLIME_MODE, comp.withUseMode(newUseMode));
@@ -54,13 +52,13 @@ public class SlimeModeServerHandler {
 
         // 現在のマイニングモードを切替
         String newMiningMode = switch (comp.miningMode()) {
-            case "fortune" -> "silk_touch";
-            case "silk_touch" -> "fortune";
-            default -> "default";
+            case SlimeMode.MiningMode.FORTUNE -> SlimeMode.MiningMode.SILK_TOUCH;
+            case SlimeMode.MiningMode.SILK_TOUCH -> SlimeMode.MiningMode.FORTUNE;
+            default -> SlimeMode.MiningMode.DEFAULT;
         };
 
         // デフォルトならそのまま
-        if (newMiningMode.equals("default")) return;
+        if (newMiningMode.equals(SlimeMode.MiningMode.DEFAULT)) return;
 
         Holder<Enchantment> fortuneHolder = player.level().registryAccess().lookupOrThrow(Registries.ENCHANTMENT).getOrThrow(Enchantments.FORTUNE);
         Holder<Enchantment> silkTouchHolder = player.level().registryAccess().lookupOrThrow(Registries.ENCHANTMENT).getOrThrow(Enchantments.SILK_TOUCH);
@@ -91,9 +89,9 @@ public class SlimeModeServerHandler {
         // エンチャントを再構築（fortune/silk_touchのみ付与）
         ItemEnchantments.Mutable mutable = new ItemEnchantments.Mutable(current);
         mutable.removeIf(entry -> entry.equals(fortuneHolder) || entry.equals(silkTouchHolder));
-        if (newMiningMode.equals("fortune") && miningComp.fortuneLevel() > 0) {
+        if (newMiningMode.equals(SlimeMode.MiningMode.FORTUNE) && miningComp.fortuneLevel() > 0) {
             mutable.set(fortuneHolder, miningComp.fortuneLevel());
-        } else if (newMiningMode.equals("silk_touch") && miningComp.silkTouchLevel() > 0) {
+        } else if (newMiningMode.equals(SlimeMode.MiningMode.SILK_TOUCH) && miningComp.silkTouchLevel() > 0) {
             mutable.set(silkTouchHolder, miningComp.silkTouchLevel());
         }
         stack.set(DataComponents.ENCHANTMENTS, mutable.toImmutable());
@@ -135,15 +133,15 @@ public class SlimeModeServerHandler {
      */
     public static void toggleSlimeModeHandle(UUID stackUuid, String mode, ServerPlayer player) {
         switch (mode) {
-            case "use_mode":
+            case SlimeMode.Type.USE:
                 // 使用モード（弓/ツール）切替
                 handleUseMode(player);
                 break;
-            case "mining_mode":
+            case SlimeMode.Type.MINING:
                 // マイニングモード（fortune/silk_touch）切替
                 handleMiningMode(player);
                 break;
-            case "fortune": case "silk_touch": case "default":
+            case SlimeMode.MiningMode.FORTUNE: case SlimeMode.MiningMode.SILK_TOUCH: case SlimeMode.MiningMode.DEFAULT:
                 // 個別スライムのマイニングモード更新
                 updateMiningModeForInventory(stackUuid, mode, player);
                 break;

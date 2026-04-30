@@ -2,6 +2,7 @@ package net.kasara.ts_multitools.server;
 
 import com.mojang.datafixers.util.Pair;
 import net.kasara.ts_multitools.component.ModComponents;
+import net.kasara.ts_multitools.constant.SlimeState;
 import net.kasara.ts_multitools.item.ModItems;
 import net.kasara.ts_multitools.server.data.SlimeStateServerCache;
 import net.minecraft.network.protocol.game.ClientboundSetEquipmentPacket;
@@ -35,7 +36,7 @@ public class SlimeStateServerHandler {
             if (invUuid == null) continue;
 
             if (uuid.equals(invUuid)) {
-                stack.set(ModComponents.SLIME_STATE, "slime");
+                stack.set(ModComponents.SLIME_STATE, SlimeState.SLIME);
             }
         }
         // サーバーキャッシュに保存

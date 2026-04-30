@@ -1,8 +1,7 @@
 package net.kasara.ts_multitools.client;
 
-import net.fabricmc.api.EnvType;
-import net.fabricmc.api.Environment;
 import net.kasara.ts_multitools.component.ModComponents;
+import net.kasara.ts_multitools.constant.SlimeState;
 import net.kasara.ts_multitools.network.packet.c2s.SlimeStateC2SPacket;
 import net.kasara.ts_multitools.server.ToolRightClickHandler;
 import net.minecraft.client.Minecraft;
@@ -22,7 +21,6 @@ import java.util.UUID;
 /**
  * クライアント側でスライムアイテムの見た目(state)を管理するクラス
  */
-@Environment(EnvType.CLIENT)
 public class SlimeStateClientHandler {
 
     // UUIDごとの一時的なstate維持タイマー(tick数)
@@ -65,7 +63,7 @@ public class SlimeStateClientHandler {
         boolean inHand = uuid.equals(mainHand.get(ModComponents.SLIME_UUID)) ||
                          uuid.equals(offHand.get(ModComponents.SLIME_UUID));
 
-        String state = "slime";
+        String state = SlimeState.SLIME;
 
         if (inHand) {
             // --- 採掘中状態の処理 ---
@@ -80,17 +78,17 @@ public class SlimeStateClientHandler {
             }
             // --- 採掘直後（タイマー中） ---
             else if (slimeTimers.containsKey(uuid) &&
-                    !"slime".equals(stack.get(ModComponents.SLIME_STATE)) &&
-                    !"sword".equals(stack.get(ModComponents.SLIME_STATE))) {
+                    !SlimeState.SLIME.equals(stack.get(ModComponents.SLIME_STATE)) &&
+                    !SlimeState.SWORD.equals(stack.get(ModComponents.SLIME_STATE))) {
                 // タイマー中は前のstateを維持
-                state = player.totalExperience >= 1 ? stack.get(ModComponents.SLIME_STATE) : "slime";
+                state = player.totalExperience >= 1 ? stack.get(ModComponents.SLIME_STATE) : SlimeState.SLIME;
                 int time = slimeTimers.get(uuid) - 1;
                 if (time > 0) slimeTimers.put(uuid, time);
                 else slimeTimers.remove(uuid);
             }
             // --- 通常状態 → 経験値に応じて剣かスライム ---
             else {
-                state = player.totalExperience >= 1 ? "sword" : "slime";
+                state = player.totalExperience >= 1 ? SlimeState.SWORD : SlimeState.SLIME;
                 slimeTimers.remove(uuid);
                 slimeStateDuringMining.remove(uuid);
             }
@@ -120,11 +118,11 @@ public class SlimeStateClientHandler {
      */
     private  static String getStateFromBlock(BlockState blockState) {
         if (blockState.is(BlockTags.MINEABLE_WITH_PICKAXE) ||
-                BuiltInRegistries.BLOCK.getKey(blockState.getBlock()).getPath().contains("glass")) return "pickaxe";
-        else if (blockState.is(BlockTags.MINEABLE_WITH_AXE)) return "axe";
-        else if (blockState.is(BlockTags.MINEABLE_WITH_SHOVEL)) return "shovel";
-        else if (blockState.is(BlockTags.MINEABLE_WITH_HOE)) return "hoe";
-        return "sword";
+                BuiltInRegistries.BLOCK.getKey(blockState.getBlock()).getPath().contains("glass")) return SlimeState.PICKAXE;
+        else if (blockState.is(BlockTags.MINEABLE_WITH_AXE)) return SlimeState.AXE;
+        else if (blockState.is(BlockTags.MINEABLE_WITH_SHOVEL)) return SlimeState.SHOVEL;
+        else if (blockState.is(BlockTags.MINEABLE_WITH_HOE)) return SlimeState.HOE;
+        return SlimeState.SWORD;
     }
 
     /**
@@ -139,10 +137,10 @@ public class SlimeStateClientHandler {
 
         String newState;
         switch (action) {
-            case SHOVEL -> newState = "shovel";
-            case AXE -> newState = "axe";
-            case HOE -> newState = "hoe";
-            default -> newState = "sword";
+            case SHOVEL -> newState = SlimeState.SHOVEL;
+            case AXE -> newState = SlimeState.AXE;
+            case HOE -> newState = SlimeState.HOE;
+            default -> newState = SlimeState.SWORD;
         }
 
         slimeStateDuringMining.put(uuid, newState);

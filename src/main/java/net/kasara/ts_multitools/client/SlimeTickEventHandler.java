@@ -1,7 +1,5 @@
 package net.kasara.ts_multitools.client;
 
-import net.fabricmc.api.EnvType;
-import net.fabricmc.api.Environment;
 import net.kasara.ts_multitools.item.ModItems;
 import net.minecraft.client.Minecraft;
 import net.minecraft.world.entity.player.Inventory;
@@ -13,7 +11,6 @@ import java.util.UUID;
 /**
  * 毎ティックスライムの状態更新をする
  */
-@Environment(EnvType.CLIENT)
 public class SlimeTickEventHandler {
 
     public static void slimeTickEventHandler(Minecraft client) {

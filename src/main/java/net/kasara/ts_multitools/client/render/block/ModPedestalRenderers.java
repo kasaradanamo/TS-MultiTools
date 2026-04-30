@@ -1,17 +1,16 @@
 package net.kasara.ts_multitools.client.render.block;
 
-import net.fabricmc.api.EnvType;
-import net.fabricmc.api.Environment;
 import net.kasara.tokorotenslime.api.TokorotenSlimeAPI;
-import net.kasara.ts_multitools.TSMultitools;
+import net.kasara.tokorotenslime.api.TokorotenSlimeClientAPI;
+import net.kasara.ts_multitools.TSMultiTools;
 import net.kasara.ts_multitools.component.ModComponents;
+import net.kasara.ts_multitools.constant.SlimeState;
 import net.kasara.ts_multitools.item.ModItems;
 import net.minecraft.world.item.ItemStack;
 
 /**
  * TokorotenSlimeの台座に置いた際の表示アイテム変更
  */
-@Environment(EnvType.CLIENT)
 public class ModPedestalRenderers {
 
     /**
@@ -20,16 +19,16 @@ public class ModPedestalRenderers {
      */
     public static void register() {
 
-        TokorotenSlimeAPI.registerPedestalRenderHandler(ModItems.SLIME, ModPedestalRenderers::modifySlimeRender);
+        TokorotenSlimeClientAPI.registerPedestalTransformer(ModItems.SLIME, ModPedestalRenderers::modifySlimeRender);
 
         // ログ出力
-        TSMultitools.LOGGER.info("Registering addon Pedestal Renderers for "+ TokorotenSlimeAPI.getModId() +" (from " + TSMultitools.MOD_ID + ")");
+        TSMultiTools.LOGGER.info("Registering addon Pedestal Renderers for "+ TokorotenSlimeAPI.getModId() +" (from " + TSMultiTools.MOD_ID + ")");
     }
 
     // SlimeItemの見た目を変更して描画
     private static ItemStack modifySlimeRender(ItemStack original) {
         ItemStack copy = original.copy();
-        copy.set(ModComponents.SLIME_STATE, "sword");
+        copy.set(ModComponents.SLIME_STATE, SlimeState.SWORD);
         return copy;
     }
 }

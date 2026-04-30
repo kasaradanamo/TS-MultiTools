@@ -74,7 +74,7 @@ public class MultiToolUtil {
                         AttributeModifier.Operation.ADD_VALUE
                 ), EquipmentSlotGroup.MAINHAND)
                 .add(Attributes.ATTACK_SPEED, new AttributeModifier(
-                        Item.BASE_ATTACK_DAMAGE_ID,
+                        Item.BASE_ATTACK_SPEED_ID,
                         attackSpeed,  // 呼び出し元から渡された攻撃速度
                         AttributeModifier.Operation.ADD_VALUE
                 ), EquipmentSlotGroup.MAINHAND)

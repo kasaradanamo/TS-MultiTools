@@ -5,6 +5,7 @@ import net.kasara.tokorotenslime.api.TokorotenSlimeAPI;
 import net.kasara.ts_multitools.component.MiningEnchantLevelComponent;
 import net.kasara.ts_multitools.component.ModComponents;
 import net.kasara.ts_multitools.item.ModItems;
+import net.kasara.ts_multitools.item.SlimeEnchantmentRules;
 import net.minecraft.core.Holder;
 import net.minecraft.core.component.DataComponents;
 import net.minecraft.network.RegistryFriendlyByteBuf;
@@ -106,7 +107,7 @@ public class SlimeRecipe extends CustomRecipe {
 
             for (Holder<Enchantment> holder : enchants.keySet()) {
                 // 除外エンチャントは無視
-                if (holder.is(Enchantments.UNBREAKING) || holder.is(Enchantments.MENDING) || holder.is((Enchantments.INFINITY))) {
+                if (SlimeEnchantmentRules.isBlacklisted(holder)) {
                     continue;
                 }
 

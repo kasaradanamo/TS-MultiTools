@@ -6,10 +6,12 @@ import net.kasara.ts_multitools.client.SlimeStateClientHandler;
 import net.kasara.ts_multitools.component.MiningEnchantLevelComponent;
 import net.kasara.ts_multitools.component.ModComponents;
 import net.kasara.ts_multitools.component.SlimeModeComponent;
+import net.kasara.ts_multitools.constant.SlimeMode;
+import net.kasara.ts_multitools.constant.SlimeState;
 import net.kasara.ts_multitools.entity.SlimeArrowEntity;
 import net.kasara.ts_multitools.server.SlimeUseCountManager;
 import net.kasara.ts_multitools.util.ModTags;
-import net.kasara.ts_multitools.util.OffhandTriggerTracker;
+import net.kasara.ts_multitools.server.data.OffhandTriggerTracker;
 import net.kasara.ts_multitools.server.ToolRightClickHandler;
 import net.minecraft.ChatFormatting;
 import net.minecraft.core.BlockPos;
@@ -33,7 +35,6 @@ import net.minecraft.world.item.*;
 import net.minecraft.world.item.component.TooltipDisplay;
 import net.minecraft.world.item.context.UseOnContext;
 import net.minecraft.world.item.enchantment.Enchantment;
-import net.minecraft.world.item.enchantment.Enchantments;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.state.BlockState;
 
@@ -55,7 +56,7 @@ public class SlimeItem  extends BowItem {
                         .stacksTo(1)        // スタック不可
                         .fireResistant()         // 耐火
                         .rarity(Rarity.EPIC)     // レア度：エピック
-                        .component(ModComponents.SLIME_STATE, "slime")
+                        .component(ModComponents.SLIME_STATE, SlimeState.SLIME)
                         .component(ModComponents.SLIME_MODE, SlimeModeComponent.DEFAULT)
                         .component(ModComponents.MINING_ENCHANT_LEVEL, MiningEnchantLevelComponent.DEFAULT),
                 ModTags.Blocks.SLIME_MINEABLE,    // 採掘できるブロックタグ
@@ -90,7 +91,7 @@ public class SlimeItem  extends BowItem {
         SlimeModeComponent mode = stack.get(ModComponents.SLIME_MODE);
 
         // toolモードなら右クリックで特殊アクションを処理(ここでServerPlayerEntityだと動きがつかない)
-        if (mode != null && "tool".equals(mode.useMode())) {
+        if (mode != null && SlimeMode.UseMode.TOOL.equals(mode.useMode())) {
             ToolRightClickHandler.ToolAction action = ToolRightClickHandler.handleRightClick(context);
             if (action != ToolRightClickHandler.ToolAction.NONE) {
                 if (player.level().isClientSide()) {
@@ -130,7 +131,7 @@ public class SlimeItem  extends BowItem {
         SlimeModeComponent mode = stack.get(ModComponents.SLIME_MODE);
 
         // toolモード時は弓動作を無効化
-        if (mode != null && "tool".equals(mode.useMode())) return InteractionResult.FAIL;
+        if (mode != null && SlimeMode.UseMode.TOOL.equals(mode.useMode())) return InteractionResult.FAIL;
 
         // オフハンドのフラグが立っていた場合はキャンセル
         if (OffhandTriggerTracker.get(player)) {
@@ -228,11 +229,8 @@ public class SlimeItem  extends BowItem {
      */
     @Override
     public boolean canBeEnchantedWith(ItemStack stack, Holder<Enchantment> enchantment, EnchantingContext context) {
-        if (!super.canBeEnchantedWith(stack, enchantment, context)) return false;
-
-        return !enchantment.is(Enchantments.UNBREAKING) &&
-                !enchantment.is(Enchantments.MENDING) &&
-                !enchantment.is((Enchantments.INFINITY));
+        return super.canBeEnchantedWith(stack, enchantment, context)
+                && !SlimeEnchantmentRules.isBlacklisted(enchantment);
     }
 
     /**

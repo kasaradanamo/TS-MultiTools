@@ -1,14 +1,11 @@
 package net.kasara.ts_multitools.client;
 
-import net.fabricmc.api.EnvType;
-import net.fabricmc.api.Environment;
 import net.kasara.ts_multitools.component.ModComponents;
 import net.kasara.ts_multitools.network.packet.c2s.SetSlimeUuidC2SPacket;
 import net.minecraft.world.item.ItemStack;
 
 import java.util.UUID;
 
-@Environment(EnvType.CLIENT)
 public class SlimeUuidClientManager {
 
     /**

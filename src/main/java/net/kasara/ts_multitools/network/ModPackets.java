@@ -4,7 +4,7 @@ import net.fabricmc.fabric.api.client.networking.v1.ClientPlayNetworking;
 import net.fabricmc.fabric.api.networking.v1.PayloadTypeRegistry;
 import net.fabricmc.fabric.api.networking.v1.ServerPlayNetworking;
 import net.kasara.tokorotenslime.api.TokorotenSlimeAPI;
-import net.kasara.ts_multitools.TSMultitools;
+import net.kasara.ts_multitools.TSMultiTools;
 import net.kasara.ts_multitools.network.packet.c2s.SetSlimeUuidC2SPacket;
 import net.kasara.ts_multitools.network.packet.c2s.SlimeStateC2SPacket;
 import net.kasara.ts_multitools.network.packet.c2s.ToggleSlimeModeC2SPacket;
@@ -25,14 +25,14 @@ public class ModPackets {
 
     // PayloadTypesの登録
     public static void registerPayloadTypes() {
-        registerPTC2S(ToggleSlimeModeC2SPacket.ID, ToggleSlimeModeC2SPacket.CODEC);
-        registerPTC2S(SetSlimeUuidC2SPacket.ID, SetSlimeUuidC2SPacket.CODEC);
-        registerPTC2S(SlimeStateC2SPacket.ID, SlimeStateC2SPacket.CODEC);
+        registerPTC2S(ToggleSlimeModeC2SPacket.ID, ToggleSlimeModeC2SPacket.STREAM_CODEC);
+        registerPTC2S(SetSlimeUuidC2SPacket.ID, SetSlimeUuidC2SPacket.STREAM_CODEC);
+        registerPTC2S(SlimeStateC2SPacket.ID, SlimeStateC2SPacket.STREAM_CODEC);
 
-        registerPTS2C(SlimeUseCountS2CPacket.ID, SlimeUseCountS2CPacket.CODEC);
+        registerPTS2C(SlimeUseCountS2CPacket.ID, SlimeUseCountS2CPacket.STREAM_CODEC);
 
         // ログ
-        TSMultitools.LOGGER.info("Registering addon PayloadTypes for "+ TokorotenSlimeAPI.getModId() +" (from " + TSMultitools.MOD_ID + ")");
+        TSMultiTools.LOGGER.info("Registering addon Mod PayloadTypes for "+ TokorotenSlimeAPI.getModId() +" (from " + TSMultiTools.MOD_ID + ")");
     }
 
     // C2Sの登録
@@ -42,7 +42,7 @@ public class ModPackets {
         registerC2S(SlimeStateC2SPacket.ID, SlimeStateC2SPacket::receive);
 
         // ログ
-        TSMultitools.LOGGER.info("Registering addon C2SPackets for "+ TokorotenSlimeAPI.getModId() +" (from " + TSMultitools.MOD_ID + ")");
+        TSMultiTools.LOGGER.info("Registering addon Mod C2SPackets for "+ TokorotenSlimeAPI.getModId() +" (from " + TSMultiTools.MOD_ID + ")");
     }
 
     // S2Cの登録
@@ -50,15 +50,15 @@ public class ModPackets {
         registerS2C(SlimeUseCountS2CPacket.ID, SlimeUseCountS2CPacket::receive);
 
         // ログ
-        TSMultitools.LOGGER.info("Registering addon S2CPackets for "+ TokorotenSlimeAPI.getModId() +" (from " + TSMultitools.MOD_ID + ")");
+        TSMultiTools.LOGGER.info("Registering addon Mod S2CPackets for "+ TokorotenSlimeAPI.getModId() +" (from " + TSMultiTools.MOD_ID + ")");
     }
 
-    private static <T extends CustomPacketPayload> void registerPTC2S(CustomPacketPayload.Type<T> id, StreamCodec<RegistryFriendlyByteBuf, T> codec) {
-        PayloadTypeRegistry.serverboundPlay().register(id, codec);
+    private static <T extends CustomPacketPayload> void registerPTC2S(CustomPacketPayload.Type<T> id, StreamCodec<RegistryFriendlyByteBuf, T> streamCodec) {
+        PayloadTypeRegistry.serverboundPlay().register(id, streamCodec);
     }
 
-    private static <T extends CustomPacketPayload> void registerPTS2C(CustomPacketPayload.Type<T> id, StreamCodec<RegistryFriendlyByteBuf, T> codec) {
-        PayloadTypeRegistry.clientboundPlay().register(id, codec);
+    private static <T extends CustomPacketPayload> void registerPTS2C(CustomPacketPayload.Type<T> id, StreamCodec<RegistryFriendlyByteBuf, T> streamCodec) {
+        PayloadTypeRegistry.clientboundPlay().register(id, streamCodec);
     }
 
     private static <T extends CustomPacketPayload> void registerC2S(CustomPacketPayload.Type<T> id, BiConsumer<T, ServerPlayer> handler) {

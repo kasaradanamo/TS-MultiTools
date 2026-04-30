@@ -1,7 +1,7 @@
 package net.kasara.ts_multitools.network.packet.c2s;
 
 import net.fabricmc.fabric.api.client.networking.v1.ClientPlayNetworking;
-import net.kasara.ts_multitools.TSMultitools;
+import net.kasara.ts_multitools.TSMultiTools;
 import net.kasara.ts_multitools.server.SlimeUuidServerManager;
 import net.minecraft.core.UUIDUtil;
 import net.minecraft.network.RegistryFriendlyByteBuf;
@@ -13,15 +13,12 @@ import net.minecraft.server.level.ServerPlayer;
 
 import java.util.UUID;
 
-/**
- * サーバー側にuuidをセットさせる
- */
 public record SetSlimeUuidC2SPacket(UUID uuid, int slot) implements CustomPacketPayload {
 
     public static final CustomPacketPayload.Type<SetSlimeUuidC2SPacket> ID =
-            new CustomPacketPayload.Type<>(Identifier.fromNamespaceAndPath(TSMultitools.MOD_ID, "set_slime_uuid"));
+            new CustomPacketPayload.Type<>(Identifier.fromNamespaceAndPath(TSMultiTools.MOD_ID, "set_slime_uuid"));
 
-    public static final StreamCodec<RegistryFriendlyByteBuf, SetSlimeUuidC2SPacket> CODEC =
+    public static final StreamCodec<RegistryFriendlyByteBuf, SetSlimeUuidC2SPacket> STREAM_CODEC =
             StreamCodec.composite(
                     UUIDUtil.STREAM_CODEC,
                     SetSlimeUuidC2SPacket::uuid,
