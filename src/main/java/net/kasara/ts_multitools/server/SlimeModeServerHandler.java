@@ -28,14 +28,14 @@ public class SlimeModeServerHandler {
      */
     public static void handleUseMode(ServerPlayer player) {
         ItemStack stack = player.getMainHandItem();
-        SlimeModeComponent comp = stack.get(ModComponents.SLIME_MODE);
+        SlimeModeComponent comp = stack.get(ModComponents.SLIME_MODE.get());
         if (comp == null) return;
 
         // 現在のモードを反転
         String newUseMode = comp.useMode().equals(SlimeMode.UseMode.BOW) ? SlimeMode.UseMode.TOOL : SlimeMode.UseMode.BOW;
 
         // モードを更新
-        stack.set(ModComponents.SLIME_MODE, comp.withUseMode(newUseMode));
+        stack.set(ModComponents.SLIME_MODE.get(), comp.withUseMode(newUseMode));
 
         // プレイヤーにメッセージを表示
         Component modeText = Component.translatable("mode.tokorotenslime.use." + newUseMode).setStyle(Style.EMPTY.withColor(ChatFormatting.GOLD));
@@ -47,7 +47,7 @@ public class SlimeModeServerHandler {
      */
     public static void handleMiningMode(ServerPlayer player) {
         ItemStack stack = player.getMainHandItem();
-        var comp = stack.get(ModComponents.SLIME_MODE);
+        var comp = stack.get(ModComponents.SLIME_MODE.get());
         if (comp == null) return;
 
         // 現在のマイニングモードを切替
@@ -69,7 +69,7 @@ public class SlimeModeServerHandler {
         int currentFortune = current.getLevel(fortuneHolder);
         int currentSilk = current.getLevel(silkTouchHolder);
 
-        var miningComp = stack.get(ModComponents.MINING_ENCHANT_LEVEL);
+        var miningComp = stack.get(ModComponents.MINING_ENCHANT_LEVEL.get());
         if (miningComp == null) return;
 
         int storedFortune = miningComp.fortuneLevel();
@@ -84,7 +84,7 @@ public class SlimeModeServerHandler {
         }
 
         // エンチャントレベルコンポーネントを更新
-        stack.set(ModComponents.MINING_ENCHANT_LEVEL, miningComp);
+        stack.set(ModComponents.MINING_ENCHANT_LEVEL.get(), miningComp);
 
         // エンチャントを再構築（fortune/silk_touchのみ付与）
         ItemEnchantments.Mutable mutable = new ItemEnchantments.Mutable(current);
@@ -97,7 +97,7 @@ public class SlimeModeServerHandler {
         stack.set(DataComponents.ENCHANTMENTS, mutable.toImmutable());
 
         // モードを更新
-        stack.set(ModComponents.SLIME_MODE, comp.withMiningMode(newMiningMode));
+        stack.set(ModComponents.SLIME_MODE.get(), comp.withMiningMode(newMiningMode));
 
         // プレイヤーに切替結果を通知
         Component miningText = Component.translatable("mode.tokorotenslime.mining." + newMiningMode).setStyle(Style.EMPTY.withColor(ChatFormatting.AQUA));
@@ -113,17 +113,17 @@ public class SlimeModeServerHandler {
      */
     public static void updateMiningModeForInventory(UUID stackUuid, String mode, ServerPlayer player) {
         for (ItemStack stack : player.getInventory()) {
-            if (stack.isEmpty() || stack.getItem() != ModItems.SLIME) continue;
+            if (stack.isEmpty() || stack.getItem() != ModItems.SLIME.get()) continue;
 
-            UUID uuidComp = stack.get(ModComponents.SLIME_UUID);
+            UUID uuidComp = stack.get(ModComponents.SLIME_UUID.get());
             if (uuidComp == null || !uuidComp.equals(stackUuid)) continue;
 
-            SlimeModeComponent modeComp = stack.get(ModComponents.SLIME_MODE);
+            SlimeModeComponent modeComp = stack.get(ModComponents.SLIME_MODE.get());
             if (modeComp == null) continue;
 
             // マイニングモードを更新
             SlimeModeComponent newComp = modeComp.withMiningMode(mode);
-            stack.set(ModComponents.SLIME_MODE, newComp);
+            stack.set(ModComponents.SLIME_MODE.get(), newComp);
         }
     }
 

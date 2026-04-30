@@ -30,13 +30,13 @@ public class SlimeStateServerHandler {
 
         // インベントリ内のスライムのSTATEを0に設定（サーバー側のみ）
         for (ItemStack stack : inv) {
-            if (stack.isEmpty() || stack.getItem() != ModItems.SLIME) continue;
+            if (stack.isEmpty() || stack.getItem() != ModItems.SLIME.get()) continue;
 
-            UUID invUuid = stack.get(ModComponents.SLIME_UUID);
+            UUID invUuid = stack.get(ModComponents.SLIME_UUID.get());
             if (invUuid == null) continue;
 
             if (uuid.equals(invUuid)) {
-                stack.set(ModComponents.SLIME_STATE, SlimeState.SLIME);
+                stack.set(ModComponents.SLIME_STATE.get(), SlimeState.SLIME);
             }
         }
         // サーバーキャッシュに保存
@@ -48,10 +48,10 @@ public class SlimeStateServerHandler {
         //送信情報を格納するやつ
         List<Pair<EquipmentSlot, ItemStack>> equipment = new ArrayList<>();
 
-        if (mainHand.getItem() == ModItems.SLIME) {
+        if (mainHand.getItem() == ModItems.SLIME.get()) {
             equipment.add(new Pair<>(EquipmentSlot.MAINHAND, mainHand));
         }
-        if (offHand.getItem() == ModItems.SLIME) {
+        if (offHand.getItem() == ModItems.SLIME.get()) {
             equipment.add(new Pair<>(EquipmentSlot.OFFHAND, offHand));
         }
 

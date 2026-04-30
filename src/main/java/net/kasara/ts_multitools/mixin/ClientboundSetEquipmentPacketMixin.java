@@ -35,7 +35,7 @@ public class ClientboundSetEquipmentPacketMixin {
         while (it.hasNext()) {
             Pair<EquipmentSlot, ItemStack> pair = it.next(); // 現在の要素を取得
             ItemStack stack = pair.getSecond();              // アイテム部分を取得
-            if (stack.getItem() == ModItems.SLIME) {
+            if (stack.getItem() == ModItems.SLIME.get()) {
                 UUID uuid = stack.get(ModComponents.SLIME_UUID);
                 if (uuid != null) {
                     // サーバー側に保存されてるstateを取得

@@ -39,7 +39,7 @@ public class SlimeStateClientHandler {
     public static void onAttackBlock(Player player, Level level, InteractionHand hand, BlockPos pos) {
         ItemStack stack = player.getItemInHand(hand);
 
-        UUID uuid = stack.get(ModComponents.SLIME_UUID);
+        UUID uuid = stack.get(ModComponents.SLIME_UUID.get());
         if (uuid == null) return;
 
         // ブロックに応じたツール種別を取得してstate更新
@@ -49,7 +49,7 @@ public class SlimeStateClientHandler {
         // 採掘中はタイマーをリセット
         slimeTimers.remove(uuid);
 
-        stack.set(ModComponents.SLIME_STATE, state);
+        stack.set(ModComponents.SLIME_STATE.get(), state);
     }
 
     /**
@@ -60,8 +60,8 @@ public class SlimeStateClientHandler {
         ItemStack mainHand = player.getMainHandItem();
         ItemStack offHand = player.getOffhandItem();
 
-        boolean inHand = uuid.equals(mainHand.get(ModComponents.SLIME_UUID)) ||
-                         uuid.equals(offHand.get(ModComponents.SLIME_UUID));
+        boolean inHand = uuid.equals(mainHand.get(ModComponents.SLIME_UUID.get())) ||
+                         uuid.equals(offHand.get(ModComponents.SLIME_UUID.get()));
 
         String state = SlimeState.SLIME;
 
@@ -78,10 +78,10 @@ public class SlimeStateClientHandler {
             }
             // --- 採掘直後（タイマー中） ---
             else if (slimeTimers.containsKey(uuid) &&
-                    !SlimeState.SLIME.equals(stack.get(ModComponents.SLIME_STATE)) &&
-                    !SlimeState.SWORD.equals(stack.get(ModComponents.SLIME_STATE))) {
+                    !SlimeState.SLIME.equals(stack.get(ModComponents.SLIME_STATE.get())) &&
+                    !SlimeState.SWORD.equals(stack.get(ModComponents.SLIME_STATE.get()))) {
                 // タイマー中は前のstateを維持
-                state = player.totalExperience >= 1 ? stack.get(ModComponents.SLIME_STATE) : SlimeState.SLIME;
+                state = player.totalExperience >= 1 ? stack.get(ModComponents.SLIME_STATE.get()) : SlimeState.SLIME;
                 int time = slimeTimers.get(uuid) - 1;
                 if (time > 0) slimeTimers.put(uuid, time);
                 else slimeTimers.remove(uuid);
@@ -101,7 +101,7 @@ public class SlimeStateClientHandler {
         }
 
         // 実際にstateを反映
-        stack.set(ModComponents.SLIME_STATE, state);
+        stack.set(ModComponents.SLIME_STATE.get(), state);
 
         // 前回送信したstateと違う場合だけ更新
         if (stack == mainHand && !state.equals(lastSentMain.get(uuid))) {
@@ -132,7 +132,7 @@ public class SlimeStateClientHandler {
     public static void applyStateOnBlockUse(ItemStack stack, ToolRightClickHandler.ToolAction action) {
         if (stack == null || action == null) return;
 
-        UUID uuid = stack.get(ModComponents.SLIME_UUID);
+        UUID uuid = stack.get(ModComponents.SLIME_UUID.get());
         if (uuid == null) return;
 
         String newState;
@@ -145,6 +145,6 @@ public class SlimeStateClientHandler {
 
         slimeStateDuringMining.put(uuid, newState);
         slimeTimers.remove(uuid);
-        stack.set(ModComponents.SLIME_STATE, newState);
+        stack.set(ModComponents.SLIME_STATE.get(), newState);
     }
 }

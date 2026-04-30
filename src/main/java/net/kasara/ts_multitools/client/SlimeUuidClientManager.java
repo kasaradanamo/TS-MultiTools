@@ -13,7 +13,7 @@ public class SlimeUuidClientManager {
      * なかったら、生成して返す
      */
     public static UUID getOrCreate(ItemStack stack, int slot) {
-        UUID uuid = stack.get(ModComponents.SLIME_UUID);
+        UUID uuid = stack.get(ModComponents.SLIME_UUID.get());
         if (uuid == null) {
             uuid = UUID.randomUUID();
             SetSlimeUuidC2SPacket.send(uuid, slot); // uuidをサーバーに通知

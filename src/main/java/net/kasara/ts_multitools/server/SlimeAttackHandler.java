@@ -14,7 +14,7 @@ public class SlimeAttackHandler {
     public static boolean shouldCancelAttack(Player player, InteractionHand hand) {
         if (hand == InteractionHand.MAIN_HAND) {
             ItemStack stack = player.getMainHandItem();
-            return stack.getItem() == ModItems.SLIME && player.totalExperience <= 0;
+            return stack.getItem() == ModItems.SLIME.get() && player.totalExperience <= 0;
         }
         return false;
     }

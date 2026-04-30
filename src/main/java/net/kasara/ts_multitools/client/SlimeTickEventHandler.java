@@ -21,7 +21,7 @@ public class SlimeTickEventHandler {
 
         for (int i = 0; i < inventory.getContainerSize(); i++) {
             ItemStack stack = inventory.getItem(i);
-            if (stack.getItem() != ModItems.SLIME) continue;
+            if (stack.getItem() != ModItems.SLIME.get()) continue;
 
             UUID uuid = SlimeUuidClientManager.getOrCreate(stack, i);
 

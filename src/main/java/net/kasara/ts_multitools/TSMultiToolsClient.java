@@ -1,38 +1,52 @@
 package net.kasara.ts_multitools;
 
-import net.fabricmc.api.ClientModInitializer;
-import net.fabricmc.fabric.api.client.rendering.v1.EntityRendererRegistry;
 import net.kasara.tokorotenslime.api.TokorotenSlimeAPI;
 import net.kasara.ts_multitools.client.ModClientEvents;
-import net.kasara.ts_multitools.client.render.block.ModPedestalRenderers;
-import net.kasara.ts_multitools.entity.ModEntities;
-import net.kasara.ts_multitools.client.render.entity.SlimeArrowRenderer;
-import net.kasara.ts_multitools.network.ModPackets;
 import net.kasara.ts_multitools.client.option.ModKeyMappings;
+import net.kasara.ts_multitools.client.render.block.PedestalRenderRegistry;
+import net.kasara.ts_multitools.client.render.entity.SlimeArrowRenderer;
+import net.kasara.ts_multitools.entity.ModEntities;
+import net.neoforged.api.distmarker.Dist;
+import net.neoforged.bus.api.IEventBus;
+import net.neoforged.fml.common.EventBusSubscriber;
+import net.neoforged.fml.common.Mod;
+import net.neoforged.fml.event.lifecycle.FMLClientSetupEvent;
+import net.neoforged.neoforge.client.event.EntityRenderersEvent;
+import net.neoforged.neoforge.client.event.RegisterKeyMappingsEvent;
 
-public class TSMultiToolsClient implements ClientModInitializer {
+@Mod(value = TSMultiTools.MOD_ID, dist = Dist.CLIENT)
+@EventBusSubscriber(modid = TSMultiTools.MOD_ID, value = Dist.CLIENT)
+public class TSMultiToolsClient {
 
-    @Override
-    public void onInitializeClient() {
-        // S2Cパケット登録
-        ModPackets.registerS2CPackets();
+    public TSMultiToolsClient(IEventBus modEventBus) {
+        modEventBus.addListener(this::onClientSetup);
 
         // クライアントイベント登録
         ModClientEvents.register();
 
         // キーマッピング登録
-        ModKeyMappings.register();
+        modEventBus.addListener(this::registerKeys);
 
         // レンダリング登録
-        registerRenderers();
-
-        // 台座描画登録
-        ModPedestalRenderers.register();
+        modEventBus.addListener(this::registerRenderers);
     }
 
-    private void registerRenderers() {
-        // スライム矢の描画登録
-        EntityRendererRegistry.register(ModEntities.SLIME_ARROW, SlimeArrowRenderer::new);
+    private void onClientSetup(FMLClientSetupEvent event) {
+        // 台座描画
+        PedestalRenderRegistry.register();
+    }
+
+    private void registerKeys(RegisterKeyMappingsEvent event) {
+        // Slimeのモード変更キー登録
+        event.register(ModKeyMappings.MODE_TOGGLE);
+
+        // 登録完了ログを出力
+        TSMultiTools.LOGGER.info("Registering addon Mod Key Mappings for "+ TokorotenSlimeAPI.getModId() +" (from " + TSMultiTools.MOD_ID + ")");
+    }
+
+    private void registerRenderers(EntityRenderersEvent.RegisterRenderers event) {
+        // スライム矢の描画
+        event.registerEntityRenderer(ModEntities.SLIME_ARROW.get(), SlimeArrowRenderer::new);
 
         // 登録完了ログを出力
         TSMultiTools.LOGGER.info("Registering addon Mod Renderers for "+ TokorotenSlimeAPI.getModId() +" (from " + TSMultiTools.MOD_ID + ")");

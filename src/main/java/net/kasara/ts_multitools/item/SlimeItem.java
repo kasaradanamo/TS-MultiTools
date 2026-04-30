@@ -1,8 +1,7 @@
 package net.kasara.ts_multitools.item;
 
-import net.fabricmc.fabric.api.item.v1.EnchantingContext;
-import net.kasara.ts_multitools.client.data.SlimeUseCountClientCache;
 import net.kasara.ts_multitools.client.SlimeStateClientHandler;
+import net.kasara.ts_multitools.client.data.SlimeUseCountClientCache;
 import net.kasara.ts_multitools.component.MiningEnchantLevelComponent;
 import net.kasara.ts_multitools.component.ModComponents;
 import net.kasara.ts_multitools.component.SlimeModeComponent;
@@ -10,9 +9,9 @@ import net.kasara.ts_multitools.constant.SlimeMode;
 import net.kasara.ts_multitools.constant.SlimeState;
 import net.kasara.ts_multitools.entity.SlimeArrowEntity;
 import net.kasara.ts_multitools.server.SlimeUseCountManager;
-import net.kasara.ts_multitools.util.ModTags;
-import net.kasara.ts_multitools.server.data.OffhandTriggerTracker;
 import net.kasara.ts_multitools.server.ToolRightClickHandler;
+import net.kasara.ts_multitools.server.data.OffhandTriggerTracker;
+import net.kasara.ts_multitools.util.ModTags;
 import net.minecraft.ChatFormatting;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Holder;
@@ -25,7 +24,7 @@ import net.minecraft.server.level.ServerLevel;
 import net.minecraft.sounds.SoundEvents;
 import net.minecraft.sounds.SoundSource;
 import net.minecraft.stats.Stats;
-import net.minecraft.util.*;
+import net.minecraft.util.Unit;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.InteractionResult;
 import net.minecraft.world.entity.LivingEntity;
@@ -37,6 +36,7 @@ import net.minecraft.world.item.context.UseOnContext;
 import net.minecraft.world.item.enchantment.Enchantment;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.state.BlockState;
+import org.jspecify.annotations.Nullable;
 
 import java.util.List;
 import java.util.UUID;
@@ -56,9 +56,9 @@ public class SlimeItem  extends BowItem {
                         .stacksTo(1)        // スタック不可
                         .fireResistant()         // 耐火
                         .rarity(Rarity.EPIC)     // レア度：エピック
-                        .component(ModComponents.SLIME_STATE, SlimeState.SLIME)
-                        .component(ModComponents.SLIME_MODE, SlimeModeComponent.DEFAULT)
-                        .component(ModComponents.MINING_ENCHANT_LEVEL, MiningEnchantLevelComponent.DEFAULT),
+                        .component(ModComponents.SLIME_STATE.get(), SlimeState.SLIME)
+                        .component(ModComponents.SLIME_MODE.get(), SlimeModeComponent.DEFAULT)
+                        .component(ModComponents.MINING_ENCHANT_LEVEL.get(), MiningEnchantLevelComponent.DEFAULT),
                 ModTags.Blocks.SLIME_MINEABLE,    // 採掘できるブロックタグ
                 3,                                // 攻撃力 (バニラ剣と同じ)
                 -2.4F                             // 攻撃速度（バニラ剣と同じ）
@@ -71,10 +71,18 @@ public class SlimeItem  extends BowItem {
     @Override
     public ItemStack getDefaultInstance() {
         ItemStack stack = super.getDefaultInstance();
-        if (!stack.has(ModComponents.SLIME_UUID)) {
-            stack.set(ModComponents.SLIME_UUID, UUID.randomUUID());
+        if (!stack.has(ModComponents.SLIME_UUID.get())) {
+            stack.set(ModComponents.SLIME_UUID.get(), UUID.randomUUID());
         }
         return stack;
+    }
+
+    /**
+     * 耐久消費なし
+     */
+    @Override
+    public <T extends LivingEntity> int damageItem(ItemStack stack, int amount, @Nullable T entity, Consumer<Item> onBroken) {
+        return 0;
     }
 
     /**
@@ -88,7 +96,7 @@ public class SlimeItem  extends BowItem {
                 || player.totalExperience < 1) return InteractionResult.PASS; // XP不足なら処理しない
 
         ItemStack stack = context.getItemInHand();
-        SlimeModeComponent mode = stack.get(ModComponents.SLIME_MODE);
+        SlimeModeComponent mode = stack.get(ModComponents.SLIME_MODE.get());
 
         // toolモードなら右クリックで特殊アクションを処理(ここでServerPlayerEntityだと動きがつかない)
         if (mode != null && SlimeMode.UseMode.TOOL.equals(mode.useMode())) {
@@ -128,7 +136,7 @@ public class SlimeItem  extends BowItem {
         if (player.totalExperience < 1) return InteractionResult.FAIL; // XP不足なら発射不可
 
         ItemStack stack = player.getItemInHand(hand);
-        SlimeModeComponent mode = stack.get(ModComponents.SLIME_MODE);
+        SlimeModeComponent mode = stack.get(ModComponents.SLIME_MODE.get());
 
         // toolモード時は弓動作を無効化
         if (mode != null && SlimeMode.UseMode.TOOL.equals(mode.useMode())) return InteractionResult.FAIL;
@@ -224,12 +232,12 @@ public class SlimeItem  extends BowItem {
     }
 
     /**
-     * エンチャント可能かどうかを判定
+     * エンチャント可能かどうかを判定（エンチャントテーブルのみ、リストから除外）
      * Unbreaking(耐久), Mending(修繕), Infinity(無限) は除外
      */
     @Override
-    public boolean canBeEnchantedWith(ItemStack stack, Holder<Enchantment> enchantment, EnchantingContext context) {
-        return super.canBeEnchantedWith(stack, enchantment, context)
+    public boolean isPrimaryItemFor(ItemStack stack, Holder<Enchantment> enchantment) {
+        return super.isPrimaryItemFor(stack, enchantment)
                 && !SlimeEnchantmentRules.isBlacklisted(enchantment);
     }
 
@@ -240,7 +248,7 @@ public class SlimeItem  extends BowItem {
      * 使用モード（bow/tool）
      */
     @Override
-    public void appendHoverText(ItemStack itemStack, Item.TooltipContext context, TooltipDisplay display, Consumer<Component> builder, TooltipFlag tooltipFlag) {
+    public void appendHoverText(ItemStack itemStack, TooltipContext context, TooltipDisplay display, Consumer<Component> builder, TooltipFlag tooltipFlag) {
         super.appendHoverText(itemStack, context, display, builder, tooltipFlag);
 
         // 使用回数の表示
@@ -249,7 +257,7 @@ public class SlimeItem  extends BowItem {
         );
 
         // モード情報の表示
-        SlimeModeComponent mode = itemStack.get(ModComponents.SLIME_MODE);
+        SlimeModeComponent mode = itemStack.get(ModComponents.SLIME_MODE.get());
         if (mode != null) {
             // マイニングモード表示
             Component miningText = Component.translatable("mode.tokorotenslime.mining." + mode.miningMode());

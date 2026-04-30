@@ -31,20 +31,20 @@ public class SlimeArrowEntity extends AbstractArrow {
 
     public SlimeArrowEntity(final EntityType<? extends SlimeArrowEntity> type, final Level level) {
         super(type, level);
-        this.pickup = AbstractArrow.Pickup.CREATIVE_ONLY;
+        this.pickup = Pickup.CREATIVE_ONLY;
     }
 
     public SlimeArrowEntity(final Level level, final double x, final double y, final double z, final ItemStack pickupItemStack, @Nullable final ItemStack firedFromWeapon) {
-        super(ModEntities.SLIME_ARROW, x, y, z, level, pickupItemStack, firedFromWeapon);
+        super(ModEntities.SLIME_ARROW.get(), x, y, z, level, pickupItemStack, firedFromWeapon);
         this.updateColor();
-        this.pickup = AbstractArrow.Pickup.CREATIVE_ONLY;
+        this.pickup = Pickup.CREATIVE_ONLY;
     }
 
     // 弓から発射されるときに使う
     public SlimeArrowEntity(final Level level, final LivingEntity owner, final ItemStack pickupItemStack, @Nullable final ItemStack firedFromWeapon) {
-        super(ModEntities.SLIME_ARROW, owner, level, pickupItemStack, firedFromWeapon);
+        super(ModEntities.SLIME_ARROW.get(), owner, level, pickupItemStack, firedFromWeapon);
         this.updateColor();
-        this.pickup = AbstractArrow.Pickup.CREATIVE_ONLY;
+        this.pickup = Pickup.CREATIVE_ONLY;
     }
 
     private PotionContents getPotionContents() {

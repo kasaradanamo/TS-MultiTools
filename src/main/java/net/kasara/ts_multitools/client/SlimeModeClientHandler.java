@@ -1,11 +1,11 @@
 package net.kasara.ts_multitools.client;
 
+import net.kasara.ts_multitools.client.option.ModKeyMappings;
 import net.kasara.ts_multitools.component.ModComponents;
 import net.kasara.ts_multitools.component.SlimeModeComponent;
 import net.kasara.ts_multitools.constant.SlimeMode;
 import net.kasara.ts_multitools.item.ModItems;
 import net.kasara.ts_multitools.network.packet.c2s.ToggleSlimeModeC2SPacket;
-import net.kasara.ts_multitools.client.option.ModKeyMappings;
 import net.minecraft.client.Minecraft;
 import net.minecraft.core.Holder;
 import net.minecraft.core.component.DataComponents;
@@ -38,9 +38,9 @@ public class SlimeModeClientHandler {
             modeTogglePressed = true;
 
             ItemStack stack = minecraft.player.getMainHandItem();
-            if (stack.getItem() != ModItems.SLIME) return;
+            if (stack.getItem() != ModItems.SLIME.get()) return;
 
-            UUID stackUuid = stack.get(ModComponents.SLIME_UUID);
+            UUID stackUuid = stack.get(ModComponents.SLIME_UUID.get());
 
             boolean ctrlPressed = GLFW.glfwGetKey(minecraft.getWindow().handle(),
                     GLFW.GLFW_KEY_LEFT_CONTROL) == GLFW.GLFW_PRESS;
@@ -58,7 +58,7 @@ public class SlimeModeClientHandler {
      */
     public static void updateSlimeEnchantment(ItemStack stack, UUID uuid) {
         String desiredMode = getMiningModeFromEnchantments(stack);
-        SlimeModeComponent mode = stack.get(ModComponents.SLIME_MODE);
+        SlimeModeComponent mode = stack.get(ModComponents.SLIME_MODE.get());
 
         if (!desiredMode.equals(mode.miningMode())) {
             ToggleSlimeModeC2SPacket.send(uuid, desiredMode);
@@ -83,6 +83,6 @@ public class SlimeModeClientHandler {
 
         if (hasFortune) return SlimeMode.MiningMode.FORTUNE;
         if (hasSilkTouch) return SlimeMode.MiningMode.SILK_TOUCH;
-        return "default";
+        return SlimeMode.MiningMode.DEFAULT;
     }
 }

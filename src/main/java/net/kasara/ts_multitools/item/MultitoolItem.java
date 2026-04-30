@@ -1,7 +1,7 @@
 package net.kasara.ts_multitools.item;
 
-import net.kasara.ts_multitools.util.ModTags;
 import net.kasara.ts_multitools.server.ToolRightClickHandler;
+import net.kasara.ts_multitools.util.ModTags;
 import net.minecraft.world.InteractionResult;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ToolMaterial;

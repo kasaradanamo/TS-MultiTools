@@ -65,7 +65,7 @@ public class SlimeRecipe extends CustomRecipe {
             else if (item == Items.BOW) hasBow = true;
             else if (item == Items.NETHER_STAR) hasStar = true;
 
-            else if (item == ModItems.NETHERITE_MULTITOOL) hasMultitool = true;
+            else if (item == ModItems.NETHERITE_MULTITOOL.get()) hasMultitool = true;
 
             else return false;  // 不要なアイテムがあればレシピ不一致
         }
@@ -86,13 +86,13 @@ public class SlimeRecipe extends CustomRecipe {
      */
     @Override
     public ItemStack assemble(CraftingInput input) {
-        ItemStack result = new ItemStack(ModItems.SLIME);
+        ItemStack result = new ItemStack(ModItems.SLIME.get());
 
         // エンチャントボックス初期化
         ItemEnchantments.Mutable mutable = new ItemEnchantments.Mutable(ItemEnchantments.EMPTY);
 
         // マイニングエンチャントのコンポーネントを取得
-        MiningEnchantLevelComponent comp = result.get(ModComponents.MINING_ENCHANT_LEVEL);
+        MiningEnchantLevelComponent comp = result.get(ModComponents.MINING_ENCHANT_LEVEL.get());
         if (comp == null) return ItemStack.EMPTY;
 
         boolean hasSilkTouch = false;
@@ -141,7 +141,7 @@ public class SlimeRecipe extends CustomRecipe {
         }
 
         // エンチャントとマイニング情報を結果アイテムにセット
-        result.set(ModComponents.MINING_ENCHANT_LEVEL, comp);
+        result.set(ModComponents.MINING_ENCHANT_LEVEL.get(), comp);
         result.set(DataComponents.ENCHANTMENTS, mutable.toImmutable());
 
         return result;
@@ -189,7 +189,7 @@ public class SlimeRecipe extends CustomRecipe {
                 Ingredient.of(Items.NETHER_STAR),
                 Ingredient.of(Items.SLIME_BALL),
                 Ingredient.of(Items.SLIME_BALL),
-                Ingredient.of(ModItems.NETHERITE_MULTITOOL)
+                Ingredient.of(ModItems.NETHERITE_MULTITOOL.get())
         ));
     }
 
@@ -211,18 +211,18 @@ public class SlimeRecipe extends CustomRecipe {
                                 Ingredient.of(Items.SLIME_BALL).display(),
                                 Ingredient.of(Items.SLIME_BALL).display()
                         ),
-                        new SlotDisplay.ItemStackSlotDisplay(new ItemStackTemplate(ModItems.SLIME)),
+                        new SlotDisplay.ItemStackSlotDisplay(new ItemStackTemplate(ModItems.SLIME.get())),
                         new SlotDisplay.ItemSlotDisplay(Items.CRAFTING_TABLE)
                 ),
                 new ShapelessCraftingRecipeDisplay(
                         List.of(
-                                Ingredient.of(ModItems.NETHERITE_MULTITOOL).display(),
+                                Ingredient.of(ModItems.NETHERITE_MULTITOOL.get()).display(),
                                 Ingredient.of(Items.BOW).display(),
                                 Ingredient.of(Items.NETHER_STAR).display(),
                                 Ingredient.of(Items.SLIME_BALL).display(),
                                 Ingredient.of(Items.SLIME_BALL).display()
                         ),
-                        new SlotDisplay.ItemStackSlotDisplay(new ItemStackTemplate(ModItems.SLIME)),
+                        new SlotDisplay.ItemStackSlotDisplay(new ItemStackTemplate(ModItems.SLIME.get())),
                         new SlotDisplay.ItemSlotDisplay(Items.CRAFTING_TABLE)
                 )
         );

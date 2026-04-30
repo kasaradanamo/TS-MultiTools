@@ -14,9 +14,9 @@ public class SlimeUuidServerManager {
 
     public static void setSlimeUuid(ServerPlayer player, UUID uuid, int slot) {
         ItemStack stack = player.getInventory().getItem(slot);
-        if (stack.getItem() != ModItems.SLIME) return;
+        if (stack.getItem() != ModItems.SLIME.get()) return;
 
-        stack.set(ModComponents.SLIME_UUID, uuid);
+        stack.set(ModComponents.SLIME_UUID.get(), uuid);
     }
 
     private SlimeUuidServerManager() {}
