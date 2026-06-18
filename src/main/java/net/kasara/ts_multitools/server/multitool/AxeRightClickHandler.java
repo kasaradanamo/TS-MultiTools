@@ -2,7 +2,7 @@ package net.kasara.ts_multitools.server.multitool;
 
 import com.google.common.collect.BiMap;
 import com.google.common.collect.ImmutableMap;
-import net.minecraft.advancements.CriteriaTriggers;
+import net.minecraft.advancements.triggers.CriteriaTriggers;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.core.component.DataComponents;
