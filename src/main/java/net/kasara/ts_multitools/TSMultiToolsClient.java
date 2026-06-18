@@ -4,7 +4,7 @@ import net.fabricmc.api.ClientModInitializer;
 import net.fabricmc.fabric.api.client.rendering.v1.EntityRendererRegistry;
 import net.kasara.tokorotenslime.api.TokorotenSlimeAPI;
 import net.kasara.ts_multitools.client.ModClientEvents;
-import net.kasara.ts_multitools.client.render.block.ModPedestalRenderers;
+import net.kasara.ts_multitools.client.render.block.PedestalRenderRegistry;
 import net.kasara.ts_multitools.entity.ModEntities;
 import net.kasara.ts_multitools.client.render.entity.SlimeArrowRenderer;
 import net.kasara.ts_multitools.network.ModPackets;
@@ -27,7 +27,7 @@ public class TSMultiToolsClient implements ClientModInitializer {
         registerRenderers();
 
         // 台座描画登録
-        ModPedestalRenderers.register();
+        PedestalRenderRegistry.register();
     }
 
     private void registerRenderers() {
