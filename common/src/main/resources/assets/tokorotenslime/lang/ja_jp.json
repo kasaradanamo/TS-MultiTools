@@ -1,0 +1,31 @@
+{
+  "item.tokorotenslime.slime": "スライム",
+  "item.tokorotenslime.wooden_multitool": "木のマルチツール",
+  "item.tokorotenslime.stone_multitool": "石のマルチツール",
+  "item.tokorotenslime.iron_multitool": "鉄のマルチツール",
+  "item.tokorotenslime.golden_multitool": "金のマルチツール",
+  "item.tokorotenslime.diamond_multitool": "ダイヤモンドのマルチツール",
+  "item.tokorotenslime.netherite_multitool": "ネザライトのマルチツール",
+  "item.tokorotenslime.slime_sword_icon": "スライムソードアイコン",
+
+  "tooltip.tokorotenslime.proficiency": "練度: %s",
+  "tooltip.tokorotenslime.use_mode": "モード: %s",
+  "tooltip.tokorotenslime.mining_mode": "採掘モード: %s",
+
+  "advancements.tokorotenslime.get_slime.description": "強さとは力ではなく その在り方だ",
+  "advancements.tokorotenslime.get_slime.title": "陰に潜み、陰を狩る者",
+
+  "command.tokorotenslime.reset_slime_count": "スライムの練度をリセットしました！",
+  "command.tokorotenslime.set_slime_count": "スライムの練度を %s に設定しました！",
+
+  "key.tokorotenslime.mode_toggle": "スライムのモード切替",
+
+  "message.tokorotenslime.use_mode": "モードが %s に切り替わりました！",
+  "message.tokorotenslime.mining_mode": "採掘モードが %s に切り替わりました！",
+
+  "mode.tokorotenslime.use.bow": "弓",
+  "mode.tokorotenslime.use.tool": "ツール",
+  "mode.tokorotenslime.mining.fortune": "幸運",
+  "mode.tokorotenslime.mining.silk_touch": "シルクタッチ",
+  "mode.tokorotenslime.mining.default": "通常"
+}

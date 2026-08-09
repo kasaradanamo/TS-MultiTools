@@ -1,0 +1,16 @@
+{
+  "parent": "minecraft:item/generated",
+  "textures": {
+    "layer0": "tokorotenslime:item/slime"
+  },
+  "overrides": [
+    { "predicate": { "custom_model_data": 1 }, "model": "tokorotenslime:item/slime_sword" },
+    { "predicate": { "custom_model_data": 2 }, "model": "tokorotenslime:item/slime_pickaxe" },
+    { "predicate": { "custom_model_data": 3 }, "model": "tokorotenslime:item/slime_axe" },
+    { "predicate": { "custom_model_data": 4 }, "model": "tokorotenslime:item/slime_shovel" },
+    { "predicate": { "custom_model_data": 5 }, "model": "tokorotenslime:item/slime_hoe" },
+    { "predicate": { "pulling": 1 }, "model": "tokorotenslime:item/slime_bow_pulling_0" },
+    { "predicate": { "pulling": 1, "pull": 0.65 }, "model": "tokorotenslime:item/slime_bow_pulling_1" },
+    { "predicate": { "pulling": 1, "pull": 0.9 }, "model": "tokorotenslime:item/slime_bow_pulling_2" }
+  ]
+}

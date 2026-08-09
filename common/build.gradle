@@ -1,0 +1,19 @@
+buildscript {
+    repositories {
+        maven { url = 'https://maven.fabricmc.net/' }
+        mavenCentral()
+    }
+    dependencies {
+        classpath "net.fabricmc:fabric-loom:${loom_version}"
+    }
+}
+
+apply plugin: 'fabric-loom'
+
+// このmod(TS_MultiTools)配下のcommon/forge/fabricで共有するプロパティ(mod_id等)を読み込む。
+rootProject.ext.loadModProperties(project, 'TS_MultiTools')
+
+dependencies {
+    // TokorotenSlime(コアMod)commonへの依存。TokorotenSlimeClientAPI等を参照するため。
+    compileOnly project(path: ':TokorotenSlime:common', configuration: 'namedElements')
+}

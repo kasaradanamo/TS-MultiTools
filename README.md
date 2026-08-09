@@ -3,14 +3,14 @@
 ![multitools](https://cdn.modrinth.com/data/cached_images/64d706bf853af231988708ef39513e5a1d66f5e0.png)
 
 - **<a href="https://x.com/kasaradanamo" target="_blank">X(Twitter)</a>**<br>
-- **<a href="https://github.com/kasaradanamo/TS-Multitools" target="_blank">GitHub</a>**<br>
+- **<a href="https://github.com/kasaradanamo/TS-MultiTools" target="_blank">GitHub</a>**<br>
 
 ---
 
 日本語の説明は下にあります。<br>
 <br>
 This mod adds multiple multi-tools.<br>
-This Mod is an addon for <a href="https://modrinth.com/project/tokorotenslime" target="_blank">Tokorotenslime</a>, so you'll also need to download that as well.<br>
+This Mod is an addon for <a href="https://modrinth.com/project/tokorotenslime" target="_blank">TokorotenSlime</a>, so you'll also need to download that as well.<br>
 
 ## Wooden, Stone, Copper, Iron, Golden, Diamond, and Netherite Multitools
 ### Crafting
@@ -44,11 +44,13 @@ Actually, everything up to this point is just a bonus feature.
     - As proficiency increases, the probability of consuming experience points decreases.
     - Maximum proficiency level 50,000, with experience point consumption reduced to 1/5 when used.
     - Using `/slimecount`, you can set the count to any value.
-- This item cannot be used if your experience points are 0.
+- If your experience points are 0, it behaves like an item with no functionality.<br>(Suitable tool detection and the sword's sweep attack no longer apply.)
+- Blocks that break instantly, such as torches, consume no experience points and do not increase proficiency.
 - Left-click functions the same as the multi-tools, but glass and wool are also recognized as suitable tools.
+- While holding a torch in your off-hand, placing the block takes priority when you are aiming at a block.
 - The appearance of items changes depending on the blocks destroyed and the amount of experience points gained.
 - This item has modes that can be switched using specific keys:
-    - **Bow Mode:** Right-click to perform the bow action (Arrows are not needed).
+    - **Bow Mode:** Right-click to perform the bow action (Arrows are not needed).<br>The arrows fired can only be retrieved in Creative mode.
     - **Tool Mode:** Right-clicking performs the same action as the multi-tools.
     - If the item has the Luck or Silk Touch enchantment, you can swap them using the mode change key.<br>(Default: Luck Lv3, Silk Touch Lv1)
 - Enchantments can be transferred during crafting.
@@ -108,11 +110,13 @@ The English explanation is above.<br>
     - 練度が上がると、経験値の消費確率が減少します。
     - 最大練度50,000で、使用時の経験値消費は1/5になります。
     - `/slimecount`でカウントを任意の値にできます。
-- 経験値が0の場合、このアイテムは使用できません。
+- 経験値が0の場合、機能を持たないアイテムを持っている状態と同じになります。<br>（適性ツールの判定や、剣の薙ぎ払いが適用されなくなります）
+- 松明など即時破壊できるブロックでは、経験値を消費せず練度も増加しません。
 - 左クリックの動作はマルチツールと同じですが、ガラスや羊毛も適性ツールと判定されます。
+- 左手に松明を持っている場合、ブロックに目線を向けているとそちらの設置が優先されます。
 - 壊すブロックや経験値量に応じて、アイテムの見た目が変化します。
 - このアイテムにはモードがあり、特定のキーで切り替え可能です。
-    - **弓モード:** 右クリックで弓の動作をします。矢は不要です。
+    - **弓モード:** 右クリックで弓の動作をします。矢は不要です。<br>発射された矢はクリエイティブでのみ回収可能です。
     - **ツールモード:** 右クリックでマルチツールと同じ動作をします。
     - 幸運またはシルクタッチのエンチャントが付与されている場合、モード変更キーでスワップ可能です。<br>（デフォルトは幸運Lv3、シルクタッチLv1）
 - クラフト時にエンチャントを引き継ぐことが可能です。

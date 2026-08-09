@@ -1,0 +1,15 @@
+{
+  "type": "minecraft:crafting_shapeless",
+  "category": "equipment",
+  "ingredients": [
+    { "item": "minecraft:diamond_shovel" },
+    { "item": "minecraft:diamond_pickaxe" },
+    { "item": "minecraft:diamond_axe" },
+    { "item": "minecraft:diamond_hoe" },
+    { "item": "minecraft:diamond_sword" }
+  ],
+  "result": {
+    "item": "tokorotenslime:diamond_multitool",
+    "count": 1
+  }
+}
