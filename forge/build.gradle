@@ -1,0 +1,40 @@
+plugins {
+    id 'eclipse'
+    id 'idea'
+    id 'maven-publish'
+    id 'net.minecraftforge.gradle' version '[6.0,6.2)'
+    id 'org.spongepowered.mixin' version '0.7.+'
+}
+
+// このmod(TS_MultiTools)配下のcommon/forge/fabricで共有するプロパティ(mod_id等)を読み込む。
+rootProject.ext.loadModProperties(project, 'TS_MultiTools')
+
+mixin {
+    add sourceSets.main, "ts_multitools.forge.refmap.json"
+    config "ts_multitools.forge.mixins.json"
+}
+
+
+rootProject.ext.configureForgeMinecraft(project) {
+    "${mod_id}" {
+        source sourceSets.main
+        // commonモジュールのソースも開発実行環境(runClient等)で読み込む
+        source project(':TS_MultiTools:common').sourceSets.main
+    }
+    // TS_MultiToolsはTokorotenSlime(コアMod)に依存するため、実行環境にも読み込む
+    "tokorotenslime" {
+        source project(':TokorotenSlime:forge').sourceSets.main
+        source project(':TokorotenSlime:common').sourceSets.main
+    }
+}
+
+dependencies {
+    implementation project(':TS_MultiTools:common')
+
+    // TokorotenSlime(コアMod)への依存。旧プロジェクトの `implementation project(":TokorotenSlime")` と
+    // 同じ形をforge+commonの2つに分けて再現する(ForgeGradleはこの形でも問題なく解決できる)。
+    implementation project(':TokorotenSlime:forge')
+    implementation project(':TokorotenSlime:common')
+}
+
+rootProject.ext.configureForgeModule(project, ':TS_MultiTools:common')

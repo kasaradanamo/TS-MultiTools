@@ -1,0 +1,19 @@
+{
+	"required": true,
+	"minVersion": "0.8",
+	"package": "net.kasara.ts_multitools.forge.mixin",
+	"compatibilityLevel": "JAVA_17",
+	"refmap": "ts_multitools.forge.refmap.json",
+	"mixins": [
+		"DigDurabilityEnchantmentCanEnchantMixin",
+		"EnchantmentHelperMixin",
+		"ClientboundSetEquipmentPacketMixin",
+		"PlayerSweepAttackMixin"
+	],
+	"client": [
+		"client.AbstractClientPlayerMixin"
+	],
+	"injectors": {
+		"defaultRequire": 1
+	}
+}
