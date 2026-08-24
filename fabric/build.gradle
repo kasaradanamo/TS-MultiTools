@@ -10,7 +10,6 @@ buildscript {
 
 apply plugin: 'fabric-loom'
 
-// このmod(TS_MultiTools)配下のcommon/forge/fabricで共有するプロパティ(mod_id等)を読み込む。
 rootProject.ext.loadModProperties(project, 'TS_MultiTools')
 
 dependencies {

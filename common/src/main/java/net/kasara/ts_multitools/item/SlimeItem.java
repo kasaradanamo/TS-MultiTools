@@ -76,8 +76,6 @@ public class SlimeItem extends BowItem {
         return stack;
     }
 
-    // 耐久消費なし: 各ローダー側で実現している
-
     @Override
     public int getEnchantmentValue() {
         return tier.getEnchantmentValue();
