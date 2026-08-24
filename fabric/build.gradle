@@ -1,0 +1,18 @@
+plugins {
+    id 'net.fabricmc.fabric-loom' version "${loom_version}"
+    id 'maven-publish'
+}
+
+rootProject.ext.loadModProperties(project, 'TS_MultiTools')
+
+dependencies {
+    implementation "net.fabricmc:fabric-loader:${project.loader_version}"
+    implementation "net.fabricmc.fabric-api:fabric-api:${project.fabric_api_version}"
+
+    implementation project(':TS_MultiTools:common')
+
+    implementation project(':TokorotenSlime:fabric')
+    compileOnly project(':TokorotenSlime:common')
+}
+
+rootProject.ext.configureFabricModule(project, ':TS_MultiTools:common')

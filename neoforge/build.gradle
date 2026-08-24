@@ -1,0 +1,22 @@
+plugins {
+    id 'java-library'
+    id 'maven-publish'
+    id 'net.neoforged.gradle.userdev'
+}
+
+rootProject.ext.loadModProperties(project, 'TS_MultiTools')
+
+rootProject.ext.configureNeoForgeRuns(project, [
+        (mod_id)         : [project(':TS_MultiTools:common').sourceSets.main],
+        'tokorotenslime' : [project(':TokorotenSlime:tokorotenslime-neoforge').sourceSets.main,
+                            project(':TokorotenSlime:common').sourceSets.main]
+])
+
+dependencies {
+    implementation(project(':TS_MultiTools:common')) { transitive = false }
+
+    compileOnly(project(':TokorotenSlime:tokorotenslime-neoforge')) { transitive = false }
+    compileOnly(project(':TokorotenSlime:common')) { transitive = false }
+}
+
+rootProject.ext.configureNeoForgeModule(project, ':TS_MultiTools:common')
