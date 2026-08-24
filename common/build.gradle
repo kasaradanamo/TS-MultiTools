@@ -1,0 +1,15 @@
+plugins {
+    id 'net.fabricmc.fabric-loom' version "${loom_version}"
+}
+
+rootProject.ext.loadModProperties(project, 'TS_MultiTools')
+
+rootProject.ext.configureCommonModule(project)
+
+dependencies {
+    compileOnly project(':TokorotenSlime:common')
+}
+
+configurations.runtimeClasspath {
+    exclude group: 'net.minecraft'
+}

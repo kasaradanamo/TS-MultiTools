@@ -1,0 +1,40 @@
+{
+  "parent": "tokorotenslime:root",
+  "criteria": {
+    "get_slime": {
+      "trigger": "minecraft:inventory_changed",
+      "conditions": {
+        "items": [
+          {
+            "items": ["tokorotenslime:slime"],
+            "count": {
+              "min": 1
+            }
+          }
+        ]
+      }
+    }
+  },
+  "display": {
+    "description": {
+      "translate": "advancements.tokorotenslime.get_slime.description"
+    },
+    "frame": "challenge",
+    "icon": {
+      "count": 1,
+      "id": "tokorotenslime:slime_sword_icon"
+    },
+    "title": {
+      "translate": "advancements.tokorotenslime.get_slime.title"
+    }
+  },
+  "requirements": [
+    [
+      "get_slime"
+    ]
+  ],
+  "rewards": {
+    "experience": 1000
+  },
+  "sends_telemetry_event": true
+}
