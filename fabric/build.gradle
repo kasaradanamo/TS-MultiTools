@@ -1,0 +1,27 @@
+buildscript {
+    repositories {
+        maven { url = 'https://maven.fabricmc.net/' }
+        mavenCentral()
+    }
+    dependencies {
+        classpath "net.fabricmc:fabric-loom:${loom_version}"
+    }
+}
+
+apply plugin: 'fabric-loom'
+
+rootProject.ext.loadModProperties(project, 'TS_MultiTools')
+
+dependencies {
+    modImplementation "net.fabricmc:fabric-loader:${project.loader_version}"
+    modImplementation "net.fabricmc.fabric-api:fabric-api:${project.fabric_api_version}"
+
+    compileOnly "io.github.llamalad7:mixinextras-fabric:0.5.0-rc.2"
+
+    implementation project(path: ':TS_MultiTools:ts_multitools-common', configuration: 'namedElements')
+
+    modImplementation project(path: ':TokorotenSlime:tokorotenslime-fabric', configuration: 'namedElements')
+    compileOnly project(path: ':TokorotenSlime:tokorotenslime-common', configuration: 'namedElements')
+}
+
+rootProject.ext.configureFabricModule(project, ':TS_MultiTools:ts_multitools-common')
