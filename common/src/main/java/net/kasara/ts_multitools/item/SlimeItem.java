@@ -18,7 +18,6 @@ import net.minecraft.core.component.DataComponents;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.Style;
-import net.minecraft.resources.Identifier;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.sounds.SoundEvents;
 import net.minecraft.sounds.SoundSource;
@@ -55,7 +54,9 @@ public class SlimeItem  extends BowItem {
                         .rarity(Rarity.EPIC)     // レア度：エピック
                         .component(ModComponentsCommon.SLIME_STATE, SlimeState.SLIME)
                         .component(ModComponentsCommon.SLIME_MODE, SlimeModeComponent.DEFAULT)
-                        .component(ModComponentsCommon.MINING_ENCHANT_LEVEL, MiningEnchantLevelComponent.DEFAULT),
+                        .component(ModComponentsCommon.MINING_ENCHANT_LEVEL, MiningEnchantLevelComponent.DEFAULT)
+                        .component(DataComponents.UNBREAKABLE, Unit.INSTANCE)
+                        .component(DataComponents.TOOLTIP_DISPLAY, TooltipDisplay.DEFAULT.withHidden(DataComponents.UNBREAKABLE, true)),
                 ModTags.Blocks.SLIME_MINEABLE,    // 採掘できるブロックタグ
                 3,                                // 攻撃力 (バニラ剣と同じ)
                 -2.4F                             // 攻撃速度（バニラ剣と同じ）
@@ -216,8 +217,7 @@ public class SlimeItem  extends BowItem {
      */
     @Override
     public float getDestroySpeed(ItemStack itemStack, BlockState state) {
-        Identifier id = BuiltInRegistries.BLOCK.getKey(state.getBlock());
-        if (id.getPath().contains("glass")) {
+        if (state.is(ModTags.Blocks.GLASS)) {
             return 1.5F;    // ガラス系は少し早めに
         }
         return super.getDestroySpeed(itemStack, state);

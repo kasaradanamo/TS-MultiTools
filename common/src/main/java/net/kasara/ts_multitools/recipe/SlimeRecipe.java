@@ -31,10 +31,12 @@ import java.util.List;
  */
 public class SlimeRecipe extends CustomRecipe {
 
-    private static final MapCodec<SlimeRecipe> MAP_CODEC = MapCodec.unit(new SlimeRecipe());
+    private static final SlimeRecipe RECIPE = new SlimeRecipe();
+
+    private static final MapCodec<SlimeRecipe> MAP_CODEC = MapCodec.unit(RECIPE);
 
     private static final StreamCodec<RegistryFriendlyByteBuf, SlimeRecipe> STREAM_CODEC =
-            StreamCodec.unit(new SlimeRecipe());
+            StreamCodec.unit(RECIPE);
 
     public static final RecipeSerializer<SlimeRecipe> INSTANCE =
             new RecipeSerializer<>(MAP_CODEC, STREAM_CODEC);

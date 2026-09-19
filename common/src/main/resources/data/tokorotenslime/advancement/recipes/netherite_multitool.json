@@ -23,7 +23,7 @@
     },
     "has_the_recipe": {
       "conditions": {
-        "recipe": "tokorotenslime:netherite_multitool"
+        "recipes": "tokorotenslime:netherite_multitool"
       },
       "trigger": "minecraft:recipe_unlocked"
     }

@@ -1,10 +1,12 @@
 package net.kasara.ts_multitools.server;
 
+import net.minecraft.core.Holder;
+import net.minecraft.core.component.BlockTransformer;
+import net.minecraft.core.registries.Registries;
+import net.minecraft.resources.ResourceKey;
+import net.minecraft.world.InteractionResult;
 import net.minecraft.world.entity.player.Player;
-import net.minecraft.world.item.AxeItem;
-import net.minecraft.world.item.HoeItem;
-import net.minecraft.world.item.Items;
-import net.minecraft.world.item.ShovelItem;
+import net.minecraft.world.item.component.BlockTransformers;
 import net.minecraft.world.item.context.UseOnContext;
 
 /**
@@ -25,26 +27,23 @@ public final class ToolRightClickHandler {
 
         // スニーク状態でクワ処理を優先
         if (player != null && player.isShiftKeyDown()) {
-            if (hoe().useOn(context).consumesAction()) return ToolAction.HOE;
+            if (transform(context, BlockTransformers.HOE).consumesAction()) return ToolAction.HOE;
         }
 
-        if (shovel().useOn(context).consumesAction()) return ToolAction.SHOVEL;
+        if (transform(context, BlockTransformers.SHOVEL).consumesAction()) return ToolAction.SHOVEL;
 
-        if (axe().useOn(context).consumesAction()) return ToolAction.AXE;
+        if (transform(context, BlockTransformers.AXE).consumesAction()) return ToolAction.AXE;
 
         return ToolAction.NONE;
     }
 
-    private static AxeItem axe() {
-        return (AxeItem) Items.IRON_AXE;
-    }
-
-    private static ShovelItem shovel() {
-        return (ShovelItem) Items.IRON_SHOVEL;
-    }
-
-    private static HoeItem hoe() {
-        return (HoeItem) Items.IRON_HOE;
+    /**
+     * バニラのBlockTransformerレジストリから該当ルールを引いて直接適用する
+     */
+    private static InteractionResult transform(UseOnContext context, ResourceKey<BlockTransformer> key) {
+        Holder<BlockTransformer> transformer = context.getLevel().registryAccess()
+                .lookupOrThrow(Registries.BLOCK_TRANSFORMER).getOrThrow(key);
+        return transformer.value().transformBlock(context);
     }
 
     private ToolRightClickHandler() {}

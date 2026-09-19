@@ -13,7 +13,7 @@
     },
     "has_the_recipe": {
       "conditions": {
-        "recipe": "tokorotenslime:slime"
+        "recipes": "tokorotenslime:slime"
       },
       "trigger": "minecraft:recipe_unlocked"
     }

@@ -1,17 +1,20 @@
 package net.kasara.ts_multitools.client;
 
 import net.kasara.ts_multitools.component.ModComponentsCommon;
+import net.kasara.ts_multitools.component.SlimeModeComponent;
+import net.kasara.ts_multitools.constant.SlimeMode;
 import net.kasara.ts_multitools.constant.SlimeState;
 import net.kasara.ts_multitools.network.packet.c2s.SlimeStateC2SPacket;
 import net.kasara.ts_multitools.server.ToolRightClickHandler;
+import net.kasara.ts_multitools.util.ModTags;
 import net.minecraft.client.Minecraft;
 import net.minecraft.core.BlockPos;
-import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.tags.BlockTags;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.Level;
+import net.minecraft.world.level.block.CampfireBlock;
 import net.minecraft.world.level.block.state.BlockState;
 
 import java.util.HashMap;
@@ -118,11 +121,26 @@ public class SlimeStateClientHandler {
      */
     private  static String getStateFromBlock(BlockState blockState) {
         if (blockState.is(BlockTags.MINEABLE_WITH_PICKAXE) ||
-                BuiltInRegistries.BLOCK.getKey(blockState.getBlock()).getPath().contains("glass")) return SlimeState.PICKAXE;
+                blockState.is(ModTags.Blocks.GLASS)) return SlimeState.PICKAXE;
         else if (blockState.is(BlockTags.MINEABLE_WITH_AXE)) return SlimeState.AXE;
         else if (blockState.is(BlockTags.MINEABLE_WITH_SHOVEL)) return SlimeState.SHOVEL;
         else if (blockState.is(BlockTags.MINEABLE_WITH_HOE)) return SlimeState.HOE;
         return SlimeState.SWORD;
+    }
+
+    /**
+     * ブロック右クリック時に呼ばれる
+     */
+    public static void onUseBlock(Player player, Level level, InteractionHand hand, BlockPos pos) {
+        if (player.totalExperience < 1) return;
+        if (player.isSecondaryUseActive()) return;
+        if (!CampfireBlock.isLitCampfire(level.getBlockState(pos))) return;
+
+        ItemStack stack = player.getItemInHand(hand);
+        SlimeModeComponent mode = stack.get(ModComponentsCommon.SLIME_MODE);
+        if (mode == null || !SlimeMode.UseMode.TOOL.equals(mode.useMode())) return;
+
+        applyStateOnBlockUse(stack, ToolRightClickHandler.ToolAction.SHOVEL);
     }
 
     /**

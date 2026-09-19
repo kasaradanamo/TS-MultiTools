@@ -23,7 +23,7 @@
     },
     "has_the_recipe": {
       "conditions": {
-        "recipe": "tokorotenslime:copper_multitool"
+        "recipes": "tokorotenslime:copper_multitool"
       },
       "trigger": "minecraft:recipe_unlocked"
     }

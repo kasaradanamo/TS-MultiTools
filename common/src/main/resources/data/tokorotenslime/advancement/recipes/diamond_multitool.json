@@ -23,7 +23,7 @@
     },
     "has_the_recipe": {
       "conditions": {
-        "recipe": "tokorotenslime:diamond_multitool"
+        "recipes": "tokorotenslime:diamond_multitool"
       },
       "trigger": "minecraft:recipe_unlocked"
     }

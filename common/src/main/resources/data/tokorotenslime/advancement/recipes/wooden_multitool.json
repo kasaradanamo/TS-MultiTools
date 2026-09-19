@@ -23,7 +23,7 @@
     },
     "has_the_recipe": {
       "conditions": {
-        "recipe": "tokorotenslime:wooden_multitool"
+        "recipes": "tokorotenslime:wooden_multitool"
       },
       "trigger": "minecraft:recipe_unlocked"
     }

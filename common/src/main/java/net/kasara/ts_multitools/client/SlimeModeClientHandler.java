@@ -15,7 +15,7 @@ import net.minecraft.world.item.enchantment.Enchantment;
 import net.minecraft.world.item.enchantment.Enchantments;
 import net.minecraft.world.item.enchantment.ItemEnchantments;
 import net.minecraft.world.level.Level;
-import org.lwjgl.glfw.GLFW;
+import com.mojang.blaze3d.platform.InputConstants;
 
 import java.util.UUID;
 
@@ -42,8 +42,7 @@ public class SlimeModeClientHandler {
 
             UUID stackUuid = stack.get(ModComponentsCommon.SLIME_UUID);
 
-            boolean ctrlPressed = GLFW.glfwGetKey(minecraft.getWindow().handle(),
-                    GLFW.GLFW_KEY_LEFT_CONTROL) == GLFW.GLFW_PRESS;
+            boolean ctrlPressed = InputConstants.isKeyDown(InputConstants.KEY_LCONTROL);
 
             ToggleSlimeModeC2SPacket.send(stackUuid, ctrlPressed ? SlimeMode.Type.USE : SlimeMode.Type.MINING);
 
