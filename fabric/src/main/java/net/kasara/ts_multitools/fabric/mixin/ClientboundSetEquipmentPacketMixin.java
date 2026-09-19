@@ -9,11 +9,10 @@ import net.minecraft.world.entity.EquipmentSlot;
 import net.minecraft.world.item.ItemStack;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.injection.At;
-import org.spongepowered.asm.mixin.injection.Inject;
-import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
+import org.spongepowered.asm.mixin.injection.ModifyVariable;
 
+import java.util.ArrayList;
 import java.util.List;
-import java.util.ListIterator;
 import java.util.UUID;
 
 /**
@@ -24,17 +23,14 @@ import java.util.UUID;
 public class ClientboundSetEquipmentPacketMixin {
 
     /**
-     * EntityEquipmentUpdateS2CPacketのコンストラクタに対して後処理を注入
+     * コンストラクタに渡されるリストを、SLIMEだけ状態偽装した新しいリストに差し替える
      */
-    @Inject(method = "<init>(ILjava/util/List;)V", at = @At("TAIL"))
-    private void onConstruct(int entityId, List<Pair<EquipmentSlot, ItemStack>> list, CallbackInfo ci) {
-        // リストを安全に走査しつつ要素を置き換えられる ListIterator を取得
-        ListIterator<Pair<EquipmentSlot, ItemStack>> it = list.listIterator();
+    @ModifyVariable(method = "<init>(ILjava/util/List;)V", at = @At("HEAD"), argsOnly = true)
+    private static List<Pair<EquipmentSlot, ItemStack>> onConstruct(List<Pair<EquipmentSlot, ItemStack>> list) {
+        List<Pair<EquipmentSlot, ItemStack>> result = new ArrayList<>(list.size());
 
-        // リスト内の全ての (スロット, アイテム) を順番に処理
-        while (it.hasNext()) {
-            Pair<EquipmentSlot, ItemStack> pair = it.next(); // 現在の要素を取得
-            ItemStack stack = pair.getSecond();              // アイテム部分を取得
+        for (Pair<EquipmentSlot, ItemStack> pair : list) {
+            ItemStack stack = pair.getSecond();
             if (stack.getItem() == ModItemsCommon.SLIME) {
                 UUID uuid = stack.get(ModComponentsCommon.SLIME_UUID);
                 if (uuid != null) {
@@ -45,11 +41,14 @@ public class ClientboundSetEquipmentPacketMixin {
                         ItemStack fake = stack.copy();
                         fake.set(ModComponentsCommon.SLIME_STATE, state);
 
-                        // ペアを差し替える（元のリストを上書き）
-                        it.set(new Pair<>(pair.getFirst(), fake));
+                        result.add(new Pair<>(pair.getFirst(), fake));
+                        continue;
                     }
                 }
             }
+            result.add(pair);
         }
+
+        return result;
     }
 }

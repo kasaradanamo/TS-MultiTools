@@ -6,12 +6,11 @@ import net.kasara.ts_multitools.network.packet.c2s.SetSlimeUuidC2SPacket;
 import net.kasara.ts_multitools.network.packet.c2s.SlimeStateC2SPacket;
 import net.kasara.ts_multitools.network.packet.c2s.ToggleSlimeModeC2SPacket;
 import net.kasara.ts_multitools.network.packet.s2c.SlimeUseCountS2CPacket;
-import net.minecraft.client.Minecraft;
-import net.minecraft.network.protocol.common.ClientboundCustomPayloadPacket;
-import net.minecraft.network.protocol.common.ServerboundCustomPayloadPacket;
 import net.minecraft.network.protocol.common.custom.CustomPacketPayload;
 import net.minecraft.server.level.ServerPlayer;
 import net.neoforged.bus.api.IEventBus;
+import net.neoforged.neoforge.client.network.ClientPacketDistributor;
+import net.neoforged.neoforge.network.PacketDistributor;
 import net.neoforged.neoforge.network.event.RegisterPayloadHandlersEvent;
 import net.neoforged.neoforge.network.registration.PayloadRegistrar;
 
@@ -41,12 +40,10 @@ public class ModPackets {
     }
 
     public static void sendToPlayer(ServerPlayer player, CustomPacketPayload payload) {
-        player.connection.send(new ClientboundCustomPayloadPacket(payload));
+        PacketDistributor.sendToPlayer(player, payload);
     }
 
     public static void sendToServer(CustomPacketPayload payload) {
-        if (Minecraft.getInstance().getConnection() != null) {
-            Minecraft.getInstance().getConnection().send(new ServerboundCustomPayloadPacket(payload));
-        }
+        ClientPacketDistributor.sendToServer(payload);
     }
 }

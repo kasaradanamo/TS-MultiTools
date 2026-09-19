@@ -2,6 +2,7 @@ package net.kasara.ts_multitools.fabric.client;
 
 import net.fabricmc.fabric.api.client.event.lifecycle.v1.ClientTickEvents;
 import net.fabricmc.fabric.api.event.player.AttackBlockCallback;
+import net.fabricmc.fabric.api.event.player.UseBlockCallback;
 import net.kasara.tokorotenslime.api.TokorotenSlimeAPI;
 import net.kasara.ts_multitools.client.SlimeStateClientHandler;
 import net.kasara.ts_multitools.client.SlimeTickEventHandler;
@@ -26,6 +27,17 @@ public class ModClientEvents {
 
             // ブロック攻撃に応じてスライムの状態を変更
             SlimeStateClientHandler.onAttackBlock(player, level, hand, pos);
+
+            return InteractionResult.PASS;
+        });
+
+        // ブロック右クリック時に呼ばれる処理
+        UseBlockCallback.EVENT.register((player, level, hand, hitResult) -> {
+            if (!level.isClientSide() || player.getItemInHand(hand).getItem() != ModItems.SLIME)
+                return InteractionResult.PASS;
+
+            // ブロック右クリックに応じてスライムの状態を変更
+            SlimeStateClientHandler.onUseBlock(player, level, hand, hitResult.getBlockPos());
 
             return InteractionResult.PASS;
         });

@@ -42,6 +42,21 @@ public class ModClientEvents {
         SlimeStateClientHandler.onAttackBlock(player, level, hand, pos);
     }
 
+    // ブロック右クリック時のイベント
+    @SubscribeEvent
+    public static void onUseBlock(PlayerInteractEvent.RightClickBlock event) {
+        Player player = event.getEntity();
+        Level level = event.getLevel();
+        InteractionHand hand = event.getHand();
+        BlockPos pos = event.getPos();
+
+        if (!level.isClientSide() || player.getItemInHand(hand).getItem() != ModItems.SLIME.get())
+            return;
+
+        // ブロック右クリックに応じてスライムの状態を変更
+        SlimeStateClientHandler.onUseBlock(player, level, hand, pos);
+    }
+
     // 毎ティックのイベント
     @SubscribeEvent
     public static void onClientTick(ClientTickEvent.Post event) {

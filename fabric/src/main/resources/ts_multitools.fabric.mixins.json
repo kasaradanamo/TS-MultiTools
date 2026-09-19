@@ -3,8 +3,8 @@
 	"package": "net.kasara.ts_multitools.fabric.mixin",
 	"compatibilityLevel": "JAVA_25",
 	"mixins": [
-		"ItemStackMixin",
 		"EnchantmentHelperMixin",
+        "CampfireBlockMixin",
         "ClientboundSetEquipmentPacketMixin",
         "PlayerMixin"
 	],

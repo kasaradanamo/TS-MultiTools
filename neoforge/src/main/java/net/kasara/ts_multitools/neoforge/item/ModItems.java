@@ -2,6 +2,7 @@ package net.kasara.ts_multitools.neoforge.item;
 
 import net.kasara.tokorotenslime.api.TokorotenSlimeAPI;
 import net.kasara.ts_multitools.item.ModToolMaterials;
+import net.kasara.ts_multitools.item.MultitoolItem;
 import net.kasara.ts_multitools.neoforge.TSMultiTools;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ToolMaterial;
