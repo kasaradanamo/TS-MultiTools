@@ -1,6 +1,8 @@
 package net.kasara.ts_multitools.neoforge.client;
 
 import net.kasara.tokorotenslime.api.TokorotenSlimeAPI;
+import net.kasara.ts_multitools.client.SlimeFusionTooltip;
+import net.kasara.ts_multitools.client.SlimeMiningSpeedTooltip;
 import net.kasara.ts_multitools.client.SlimeStateClientHandler;
 import net.kasara.ts_multitools.client.SlimeTickEventHandler;
 import net.kasara.ts_multitools.neoforge.TSMultiTools;
@@ -13,6 +15,7 @@ import net.minecraft.world.level.Level;
 import net.neoforged.bus.api.SubscribeEvent;
 import net.neoforged.neoforge.client.event.ClientTickEvent;
 import net.neoforged.neoforge.common.NeoForge;
+import net.neoforged.neoforge.event.entity.player.ItemTooltipEvent;
 import net.neoforged.neoforge.event.entity.player.PlayerInteractEvent;
 
 /**
@@ -47,5 +50,14 @@ public class ModClientEvents {
     public static void onClientTick(ClientTickEvent.Post event) {
         // tickごとのスライム処理
         SlimeTickEventHandler.slimeTickEventHandler(Minecraft.getInstance());
+    }
+
+    // ツールチップ表示時のイベント
+    @SubscribeEvent
+    public static void onItemTooltip(ItemTooltipEvent event) {
+        // スライム合体の注意文を追加
+        SlimeFusionTooltip.appendTooltip(event.getItemStack(), event.getToolTip());
+        // 採掘速度を攻撃速度の下に追加
+        SlimeMiningSpeedTooltip.insertTooltip(event.getItemStack(), event.getToolTip());
     }
 }

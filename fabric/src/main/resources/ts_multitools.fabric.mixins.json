@@ -3,13 +3,13 @@
 	"package": "net.kasara.ts_multitools.fabric.mixin",
 	"compatibilityLevel": "JAVA_25",
 	"mixins": [
-		"ItemStackMixin",
 		"EnchantmentHelperMixin",
         "ClientboundSetEquipmentPacketMixin",
         "PlayerMixin"
 	],
     "client": [
-        "client.AbstractClientPlayerMixin"
+        "client.AbstractClientPlayerMixin",
+        "client.RangeSelectItemModelPropertiesAccessor"
     ],
 	"injectors": {
 		"defaultRequire": 1

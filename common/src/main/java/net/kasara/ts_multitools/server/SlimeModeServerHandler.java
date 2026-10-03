@@ -1,5 +1,6 @@
 package net.kasara.ts_multitools.server;
 
+import net.kasara.ts_multitools.component.MiningEnchantLevelComponent;
 import net.kasara.ts_multitools.component.ModComponentsCommon;
 import net.kasara.ts_multitools.component.SlimeModeComponent;
 import net.kasara.ts_multitools.constant.SlimeMode;
@@ -47,7 +48,7 @@ public class SlimeModeServerHandler {
      */
     public static void handleMiningMode(ServerPlayer player) {
         ItemStack stack = player.getMainHandItem();
-        var comp = stack.get(ModComponentsCommon.SLIME_MODE);
+        SlimeModeComponent comp = stack.get(ModComponentsCommon.SLIME_MODE);
         if (comp == null) return;
 
         // 現在のマイニングモードを切替
@@ -69,7 +70,7 @@ public class SlimeModeServerHandler {
         int currentFortune = current.getLevel(fortuneHolder);
         int currentSilk = current.getLevel(silkTouchHolder);
 
-        var miningComp = stack.get(ModComponentsCommon.MINING_ENCHANT_LEVEL);
+        MiningEnchantLevelComponent miningComp = stack.get(ModComponentsCommon.MINING_ENCHANT_LEVEL);
         if (miningComp == null) return;
 
         int storedFortune = miningComp.fortuneLevel();

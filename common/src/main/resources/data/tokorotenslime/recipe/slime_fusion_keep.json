@@ -1,0 +1,6 @@
+{
+  "type": "tokorotenslime:slime_fusion",
+  "template": "minecraft:slime_ball",
+  "base": "tokorotenslime:slime",
+  "addition": "#tokorotenslime:slime_fusion_addition"
+}
