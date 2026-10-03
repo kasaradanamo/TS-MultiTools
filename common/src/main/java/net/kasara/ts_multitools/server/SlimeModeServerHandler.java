@@ -1,5 +1,6 @@
 package net.kasara.ts_multitools.server;
 
+import net.kasara.ts_multitools.component.MiningEnchantLevelComponent;
 import net.kasara.ts_multitools.component.ModComponentsCommon;
 import net.kasara.ts_multitools.component.SlimeModeComponent;
 import net.kasara.ts_multitools.constant.SlimeMode;
@@ -11,6 +12,7 @@ import net.minecraft.core.registries.Registries;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.Style;
 import net.minecraft.server.level.ServerPlayer;
+import net.minecraft.world.entity.player.Inventory;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.enchantment.Enchantment;
 import net.minecraft.world.item.enchantment.Enchantments;
@@ -47,7 +49,7 @@ public class SlimeModeServerHandler {
      */
     public static void handleMiningMode(ServerPlayer player) {
         ItemStack stack = player.getMainHandItem();
-        var comp = stack.get(ModComponentsCommon.SLIME_MODE);
+        SlimeModeComponent comp = stack.get(ModComponentsCommon.SLIME_MODE);
         if (comp == null) return;
 
         // 現在のマイニングモードを切替
@@ -69,7 +71,7 @@ public class SlimeModeServerHandler {
         int currentFortune = current.getLevel(fortuneHolder);
         int currentSilk = current.getLevel(silkTouchHolder);
 
-        var miningComp = stack.get(ModComponentsCommon.MINING_ENCHANT_LEVEL);
+        MiningEnchantLevelComponent miningComp = stack.get(ModComponentsCommon.MINING_ENCHANT_LEVEL);
         if (miningComp == null) return;
 
         int storedFortune = miningComp.fortuneLevel();
@@ -112,7 +114,7 @@ public class SlimeModeServerHandler {
      * @param player 対象プレイヤー
      */
     public static void updateMiningModeForInventory(UUID stackUuid, String mode, ServerPlayer player) {
-        net.minecraft.world.entity.player.Inventory inventory = player.getInventory();
+        Inventory inventory = player.getInventory();
         for (int i = 0; i < inventory.getContainerSize(); i++) {
             ItemStack stack = inventory.getItem(i);
             if (stack.isEmpty() || stack.getItem() != ModItemsCommon.SLIME) continue;

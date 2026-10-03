@@ -18,12 +18,11 @@ import net.minecraft.core.component.DataComponents;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.Style;
-import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.sounds.SoundEvents;
 import net.minecraft.sounds.SoundSource;
 import net.minecraft.stats.Stats;
-import net.minecraft.util.*;
+import net.minecraft.util.Unit;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.InteractionResult;
 import net.minecraft.world.InteractionResultHolder;
@@ -31,12 +30,29 @@ import net.minecraft.world.entity.EquipmentSlot;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.entity.projectile.Projectile;
-import net.minecraft.world.item.*;
+import net.minecraft.world.item.BowItem;
+import net.minecraft.world.item.Item;
+import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.item.Items;
+import net.minecraft.world.item.Rarity;
+import net.minecraft.world.item.Tier;
+import net.minecraft.world.item.TooltipFlag;
+import net.minecraft.core.Holder;
+import net.minecraft.resources.ResourceLocation;
+import net.minecraft.world.entity.ai.attributes.Attribute;
+import net.minecraft.world.entity.ai.attributes.AttributeModifier;
+import net.minecraft.world.entity.ai.attributes.Attributes;
+import net.minecraft.world.item.component.ItemAttributeModifiers;
+import net.minecraft.world.item.component.Tool;
+import net.minecraft.world.item.component.Unbreakable;
 import net.minecraft.world.item.context.UseOnContext;
+import net.minecraft.world.item.enchantment.EnchantmentHelper;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.state.BlockState;
 
+import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 import java.util.UUID;
 
 import static net.kasara.ts_multitools.util.MultiToolUtil.applyMultiToolProperties;
@@ -44,7 +60,11 @@ import static net.kasara.ts_multitools.util.MultiToolUtil.applyMultiToolProperti
 /**
  * スライムアイテム
  */
-public class SlimeItem  extends BowItem {
+public class SlimeItem extends BowItem {
+
+    // 弓の引き絞りの範囲（最も遅い＝合体前、最も速い＝More Bowsのダイヤの弓）
+    private static final double SLOWEST_DRAW_TICKS = 20.0;
+    private static final double FASTEST_DRAW_TICKS = 6.0;
 
     private final Tier tier;
 
@@ -57,7 +77,8 @@ public class SlimeItem  extends BowItem {
                         .rarity(Rarity.EPIC)     // レア度：エピック
                         .component(ModComponentsCommon.SLIME_STATE, SlimeState.SLIME)
                         .component(ModComponentsCommon.SLIME_MODE, SlimeModeComponent.DEFAULT)
-                        .component(ModComponentsCommon.MINING_ENCHANT_LEVEL, MiningEnchantLevelComponent.DEFAULT),
+                        .component(ModComponentsCommon.MINING_ENCHANT_LEVEL, MiningEnchantLevelComponent.DEFAULT)
+                        .component(DataComponents.UNBREAKABLE, new Unbreakable(false)),
                 ModTags.Blocks.SLIME_MINEABLE,    // 採掘できるブロックタグ
                 3,                                // 攻撃力 (バニラ剣と同じ)
                 -2.4F                             // 攻撃速度（バニラ剣と同じ）
@@ -162,17 +183,21 @@ public class SlimeItem  extends BowItem {
         if (!(entity instanceof Player player)) return;
 
         // 引いた時間から弓のチャージ進行度を計算
-        int useTime = this.getUseDuration(itemStack, player) - remainingTime;
-        float pullProgress = getPowerForTime(useTime);
+        float charge = (this.getUseDuration(itemStack, player) - remainingTime) / getDrawTicks(itemStack);
+        float pullProgress = Math.min((charge * charge + charge * 2.0F) / 3.0F, 1.0F);
         if (pullProgress < 0.1) return;   // 引き不足なら発射しない
-
-        // ダミー矢を作成（実際の矢アイテム不要）
-        ItemStack dummyArrow = new ItemStack(Items.ARROW);
-        dummyArrow.set(DataComponents.INTANGIBLE_PROJECTILE, Unit.INSTANCE);
-        List<ItemStack> projectiles = List.of(dummyArrow);
 
         // サーバー側で矢を発射
         if (level instanceof ServerLevel serverLevel) {
+            // エンチャントで決まる本数分のダミー矢を作成（実際の矢アイテム不要）
+            int count = EnchantmentHelper.processProjectileCount(serverLevel, itemStack, player, 1);
+            List<ItemStack> projectiles = new ArrayList<>(count);
+            for (int i = 0; i < count; i++) {
+                ItemStack dummyArrow = new ItemStack(Items.ARROW);
+                dummyArrow.set(DataComponents.INTANGIBLE_PROJECTILE, Unit.INSTANCE);
+                projectiles.add(dummyArrow);
+            }
+
             this.shoot(serverLevel, player, player.getUsedItemHand(), itemStack, projectiles,
                     pullProgress * 3.0F, 1.0F, pullProgress == 1.0F, null);
         }
@@ -194,7 +219,58 @@ public class SlimeItem  extends BowItem {
     protected Projectile createProjectile(Level level, LivingEntity shooter, ItemStack weapon, ItemStack projectile, boolean isCrit) {
         SlimeArrowEntity arrow = new SlimeArrowEntity(level, shooter, projectile, weapon);
         arrow.setCritArrow(isCrit); // フルチャージならクリティカル
+        arrow.setBaseDamage(arrow.getBaseDamage() * getArrowDamageMultiplier(weapon));
         return arrow;
+    }
+
+    /**
+     * 採掘できるブロックでの採掘速度（toolコンポーネントの mineable/slime の規則の値）
+     */
+    public static float getMiningSpeed(ItemStack stack) {
+        Tool tool = stack.get(DataComponents.TOOL);
+        if (tool == null) return 1.0F;
+        for (Tool.Rule rule : tool.rules()) {
+            if (rule.blocks().unwrapKey().equals(Optional.of(ModTags.Blocks.SLIME_MINEABLE)) && rule.speed().isPresent()) {
+                return rule.speed().get();
+            }
+        }
+        return tool.defaultMiningSpeed();
+    }
+
+    /**
+     * 矢のダメージ倍率。剣の1発と同じく、攻撃力÷合体前の攻撃力（1倍より下げない）
+     */
+    public static double getArrowDamageMultiplier(ItemStack stack) {
+        return Math.max(ratioToBase(stack, Attributes.ATTACK_DAMAGE, Item.BASE_ATTACK_DAMAGE_ID), 1.0);
+    }
+
+    /**
+     * 引き絞りきるまでのtick数。攻撃速度に比例して速くなる（20tick×合体前の攻撃速度÷攻撃速度、6〜20tick）
+     */
+    public static float getDrawTicks(ItemStack stack) {
+        double ratio = Math.max(ratioToBase(stack, Attributes.ATTACK_SPEED, Item.BASE_ATTACK_SPEED_ID), 1.0);
+        return (float) Math.max(SLOWEST_DRAW_TICKS / ratio, FASTEST_DRAW_TICKS);
+    }
+
+    /**
+     * 今の値÷合体前の値。値はツールチップに出るもの（素手の値＋メインハンドの補正値）
+     */
+    private static double ratioToBase(ItemStack stack, Holder<Attribute> attribute, ResourceLocation id) {
+        ItemAttributeModifiers current = stack.getOrDefault(DataComponents.ATTRIBUTE_MODIFIERS, ItemAttributeModifiers.EMPTY);
+        ItemAttributeModifiers base = stack.getItem().components().getOrDefault(DataComponents.ATTRIBUTE_MODIFIERS, ItemAttributeModifiers.EMPTY);
+        return attributeValue(current, attribute, id) / attributeValue(base, attribute, id);
+    }
+
+    private static double attributeValue(ItemAttributeModifiers modifiers, Holder<Attribute> attribute, ResourceLocation id) {
+        double value = attribute.value().getDefaultValue();
+        for (ItemAttributeModifiers.Entry entry : modifiers.modifiers()) {
+            if (entry.matches(attribute, id)
+                    && entry.modifier().operation() == AttributeModifier.Operation.ADD_VALUE
+                    && entry.slot().test(EquipmentSlot.MAINHAND)) {
+                value += entry.modifier().amount();
+            }
+        }
+        return value;
     }
 
     /**
@@ -237,8 +313,7 @@ public class SlimeItem  extends BowItem {
      */
     @Override
     public float getDestroySpeed(ItemStack itemStack, BlockState state) {
-        ResourceLocation id = BuiltInRegistries.BLOCK.getKey(state.getBlock());
-        if (id.getPath().contains("glass")) {
+        if (state.is(ModTags.Blocks.GLASS)) {
             return 1.5F;    // ガラス系は少し早めに
         }
         return super.getDestroySpeed(itemStack, state);

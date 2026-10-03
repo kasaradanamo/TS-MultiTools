@@ -8,6 +8,7 @@ import net.kasara.tokorotenslime.api.TokorotenSlimeAPI;
 import net.kasara.ts_multitools.client.option.ModKeyMappingsCommon;
 import net.kasara.ts_multitools.client.render.block.PedestalRenderRegistry;
 import net.kasara.ts_multitools.client.render.entity.SlimeArrowRenderer;
+import net.kasara.ts_multitools.item.SlimeItem;
 import net.kasara.ts_multitools.network.ModPacketsCommon;
 import net.kasara.ts_multitools.fabric.client.ModClientEvents;
 import net.kasara.ts_multitools.fabric.client.option.ModKeyMappings;
@@ -45,7 +46,7 @@ public class TSMultiToolsClient implements ClientModInitializer {
                 (stack, level, entity, seed) -> entity != null && entity.isUsingItem() && entity.getUseItem() == stack ? 1.0F : 0.0F);
         ItemProperties.register(ModItems.SLIME, ResourceLocation.withDefaultNamespace("pull"),
                 (stack, level, entity, seed) -> entity == null || entity.getUseItem() != stack ? 0.0F
-                        : (float) (stack.getUseDuration(entity) - entity.getUseItemRemainingTicks()) / 20.0F);
+                        : (stack.getUseDuration(entity) - entity.getUseItemRemainingTicks()) / SlimeItem.getDrawTicks(stack));
     }
 
     private void registerRenderers() {

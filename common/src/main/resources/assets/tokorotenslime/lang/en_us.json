@@ -9,6 +9,7 @@
   "item.tokorotenslime.slime_sword_icon": "Slime Sword Icon",
 
   "tooltip.tokorotenslime.proficiency": "Proficiency: %s",
+  "tooltip.tokorotenslime.mining_speed": "Mining Speed",
   "tooltip.tokorotenslime.use_mode": "Mode: %s",
   "tooltip.tokorotenslime.mining_mode": "Mining Mode: %s",
 

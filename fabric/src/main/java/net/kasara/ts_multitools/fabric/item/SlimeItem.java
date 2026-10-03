@@ -4,6 +4,7 @@ import net.fabricmc.fabric.api.item.v1.EnchantingContext;
 import net.kasara.ts_multitools.item.SlimeEnchantmentRules;
 import net.minecraft.core.Holder;
 import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.item.Items;
 import net.minecraft.world.item.Tier;
 import net.minecraft.world.item.enchantment.Enchantment;
 
@@ -19,11 +20,12 @@ public class SlimeItem extends net.kasara.ts_multitools.item.SlimeItem {
 
     /**
      * エンチャント可能かどうかを判定
-     * Unbreaking(耐久), Mending(修繕), Infinity(無限) は除外
+     * バニラの弓に付けられるものも付ける。Unbreaking(耐久), Mending(修繕), Infinity(無限) は除外
      */
     @Override
     public boolean canBeEnchantedWith(ItemStack stack, Holder<Enchantment> enchantment, EnchantingContext context) {
-        return super.canBeEnchantedWith(stack, enchantment, context)
+        return (super.canBeEnchantedWith(stack, enchantment, context)
+                || Items.BOW.canBeEnchantedWith(Items.BOW.getDefaultInstance(), enchantment, context))
                 && !SlimeEnchantmentRules.isBlacklisted(enchantment);
     }
 }

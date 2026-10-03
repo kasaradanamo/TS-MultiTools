@@ -6,6 +6,7 @@ import net.kasara.ts_multitools.component.MiningEnchantLevelComponent;
 import net.kasara.ts_multitools.component.SlimeModeComponent;
 import net.kasara.ts_multitools.fabric.TSMultiTools;
 import net.minecraft.core.Registry;
+import net.minecraft.core.UUIDUtil;
 import net.minecraft.core.component.DataComponentType;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.resources.ResourceLocation;
@@ -29,7 +30,7 @@ public class ModComponents {
 
     // スライムごとの一意な識別子（UUID）を保持するコンポーネント
     public static final DataComponentType<UUID> SLIME_UUID =
-            registerDataComponentType("slime_uuid", builder -> builder.persistent(Codec.STRING.xmap(UUID::fromString, UUID::toString)));
+            registerDataComponentType("slime_uuid", builder -> builder.persistent(UUIDUtil.STRING_CODEC));
 
     private static <T> DataComponentType<T> registerDataComponentType(String name, UnaryOperator<DataComponentType.Builder<T>> builderOperator) {
         return Registry.register(BuiltInRegistries.DATA_COMPONENT_TYPE, ResourceLocation.fromNamespaceAndPath(TSMultiTools.MOD_ID, name),

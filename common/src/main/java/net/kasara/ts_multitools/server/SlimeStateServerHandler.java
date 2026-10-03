@@ -58,7 +58,7 @@ public class SlimeStateServerHandler {
 
         if (equipment.isEmpty()) return;
 
-        var packet = new ClientboundSetEquipmentPacket(player.getId(), equipment);
+        ClientboundSetEquipmentPacket packet = new ClientboundSetEquipmentPacket(player.getId(), equipment);
 
         // 本人以外のサーバープレイヤーに送信
         for (ServerPlayer other : player.level().getServer().getPlayerList().getPlayers()) {

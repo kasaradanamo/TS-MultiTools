@@ -3,7 +3,6 @@ package net.kasara.ts_multitools.client.render.block;
 import net.kasara.tokorotenslime.api.TokorotenSlimeAPI;
 import net.kasara.tokorotenslime.api.TokorotenSlimeClientAPI;
 import net.kasara.ts_multitools.TSMultiToolsCommon;
-import net.kasara.ts_multitools.component.ModComponentsCommon;
 import net.kasara.ts_multitools.constant.SlimeState;
 import net.kasara.ts_multitools.item.ModItemsCommon;
 import net.minecraft.world.item.ItemStack;
