@@ -3,6 +3,7 @@ package net.kasara.ts_multitools.forge.recipe;
 import net.kasara.tokorotenslime.TokorotenSlimeCommon;
 import net.kasara.tokorotenslime.api.TokorotenSlimeAPI;
 import net.kasara.ts_multitools.TSMultiToolsCommon;
+import net.kasara.ts_multitools.recipe.SlimeFusionRecipe;
 import net.kasara.ts_multitools.recipe.SlimeRecipe;
 import net.minecraft.world.item.crafting.RecipeSerializer;
 import net.minecraftforge.eventbus.api.IEventBus;
@@ -18,6 +19,10 @@ public class ModRecipeSerializers {
     // スライムのレシピシリアライザー
     public static final RegistryObject<RecipeSerializer<SlimeRecipe>> CRAFTING_SLIME =
             SERIALIZERS.register("crafting_slime", () -> SlimeRecipe.INSTANCE);
+
+    // スライム合体のレシピシリアライザー
+    public static final RegistryObject<RecipeSerializer<SlimeFusionRecipe>> SLIME_FUSION =
+            SERIALIZERS.register("slime_fusion", () -> SlimeFusionRecipe.SERIALIZER);
 
     public static void register(IEventBus modEventBus) {
         SERIALIZERS.register(modEventBus);

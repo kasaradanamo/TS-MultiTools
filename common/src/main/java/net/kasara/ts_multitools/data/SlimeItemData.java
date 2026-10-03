@@ -6,6 +6,7 @@ import net.kasara.ts_multitools.constant.SlimeState;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.world.item.ItemStack;
 
+import java.util.OptionalDouble;
 import java.util.UUID;
 
 /**
@@ -20,6 +21,9 @@ public final class SlimeItemData {
     private static final String KEY_SILK_TOUCH_LEVEL = "SilkTouchLevel";
     private static final String KEY_STATE = "SlimeState";
     private static final String KEY_UUID = "SlimeUuid";
+    private static final String KEY_MINING_SPEED = "MiningSpeed";
+    private static final String KEY_ATTACK_DAMAGE = "AttackDamage";
+    private static final String KEY_ATTACK_SPEED = "AttackSpeed";
 
     public static SlimeModeComponent getMode(ItemStack stack) {
         CompoundTag tag = stack.getTag();
@@ -84,6 +88,47 @@ public final class SlimeItemData {
 
     public static void setUuid(ItemStack stack, UUID uuid) {
         stack.getOrCreateTag().putUUID(KEY_UUID, uuid);
+    }
+
+    /**
+     * 合体で取り込んだ採掘速度。合体していなければ defaultSpeed
+     */
+    public static float getMiningSpeed(ItemStack stack, float defaultSpeed) {
+        CompoundTag tag = stack.getTag();
+        if (tag == null || !tag.contains(KEY_MINING_SPEED)) return defaultSpeed;
+        return tag.getFloat(KEY_MINING_SPEED);
+    }
+
+    public static void setMiningSpeed(ItemStack stack, float speed) {
+        stack.getOrCreateTag().putFloat(KEY_MINING_SPEED, speed);
+    }
+
+    /**
+     * 合体で取り込んだ攻撃力の補正値（メインハンドの足し算の値）。合体していなければ空
+     */
+    public static OptionalDouble getAttackDamage(ItemStack stack) {
+        return getDouble(stack, KEY_ATTACK_DAMAGE);
+    }
+
+    public static void setAttackDamage(ItemStack stack, double amount) {
+        stack.getOrCreateTag().putDouble(KEY_ATTACK_DAMAGE, amount);
+    }
+
+    /**
+     * 合体で取り込んだ攻撃速度の補正値（メインハンドの足し算の値）。合体していなければ空
+     */
+    public static OptionalDouble getAttackSpeed(ItemStack stack) {
+        return getDouble(stack, KEY_ATTACK_SPEED);
+    }
+
+    public static void setAttackSpeed(ItemStack stack, double amount) {
+        stack.getOrCreateTag().putDouble(KEY_ATTACK_SPEED, amount);
+    }
+
+    private static OptionalDouble getDouble(ItemStack stack, String key) {
+        CompoundTag tag = stack.getTag();
+        if (tag == null || !tag.contains(key)) return OptionalDouble.empty();
+        return OptionalDouble.of(tag.getDouble(key));
     }
 
     private SlimeItemData() {}

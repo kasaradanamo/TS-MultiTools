@@ -13,8 +13,6 @@
 		"EnchantmentCanEnchantMixin",
 		"DigDurabilityEnchantmentCanEnchantMixin",
 		"PlayerMixin",
-		"AnvilMenuMixin",
-		"ItemCombinerMenuAccessor",
 		"ItemStackMixin"
 	],
 	"client": [

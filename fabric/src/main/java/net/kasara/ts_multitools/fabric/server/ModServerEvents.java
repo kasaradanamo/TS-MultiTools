@@ -3,8 +3,10 @@ package net.kasara.ts_multitools.fabric.server;
 import net.fabricmc.fabric.api.event.player.AttackEntityCallback;
 import net.fabricmc.fabric.api.networking.v1.ServerPlayConnectionEvents;
 import net.fabricmc.fabric.api.event.lifecycle.v1.ServerTickEvents;
+import net.fabricmc.fabric.api.item.v1.ModifyItemAttributeModifiersCallback;
 import net.kasara.tokorotenslime.api.TokorotenSlimeAPI;
 import net.kasara.ts_multitools.TSMultiToolsCommon;
+import net.kasara.ts_multitools.item.SlimeItem;
 import net.kasara.ts_multitools.network.packet.s2c.SlimeUseCountS2CPacket;
 import net.kasara.ts_multitools.server.ModServerEventsCommon;
 import net.kasara.ts_multitools.server.SlimeUseCountManager;
@@ -29,6 +31,13 @@ public final class ModServerEvents {
                 ModServerEventsCommon.onPlayerTick(player);
             }
         });
+
+        // 合体で取り込んだ攻撃力・攻撃速度を反映する
+        ModifyItemAttributeModifiersCallback.EVENT.register((stack, slot, attributeModifiers) ->
+                SlimeItem.getFusedModifiers(stack, slot).forEach((attribute, modifier) -> {
+                    attributeModifiers.remove(attribute, modifier);
+                    attributeModifiers.put(attribute, modifier);
+                }));
 
         // プレイヤーがワールドに入った時のイベント
         ServerPlayConnectionEvents.JOIN.register((handler, sender, server) -> {

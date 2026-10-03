@@ -8,6 +8,7 @@ import net.kasara.ts_multitools.client.render.entity.SlimeArrowRenderer;
 import net.kasara.ts_multitools.forge.client.ModClientEvents;
 import net.kasara.ts_multitools.forge.entity.ModEntities;
 import net.kasara.ts_multitools.forge.item.ModItems;
+import net.kasara.ts_multitools.item.SlimeItem;
 import net.minecraft.client.renderer.item.ItemProperties;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraftforge.api.distmarker.Dist;
@@ -35,7 +36,7 @@ public class TSMultiToolsClient {
                     (stack, level, entity, seed) -> entity != null && entity.isUsingItem() && entity.getUseItem() == stack ? 1.0F : 0.0F);
             ItemProperties.register(ModItems.SLIME.get(), new ResourceLocation("pull"),
                     (stack, level, entity, seed) -> entity == null || entity.getUseItem() != stack ? 0.0F
-                            : (float) (stack.getUseDuration() - entity.getUseItemRemainingTicks()) / 20.0F);
+                            : (stack.getUseDuration() - entity.getUseItemRemainingTicks()) / SlimeItem.getDrawTicks(stack));
         });
     }
 

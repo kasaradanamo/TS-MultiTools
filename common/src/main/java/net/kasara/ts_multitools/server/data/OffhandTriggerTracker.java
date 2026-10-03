@@ -2,9 +2,9 @@ package net.kasara.ts_multitools.server.data;
 
 import net.minecraft.world.entity.player.Player;
 
-import java.util.HashMap;
 import java.util.Map;
 import java.util.UUID;
+import java.util.concurrent.ConcurrentHashMap;
 
 /**
  * プレイヤーのオフハンドトリガー状態を管理するユーティリティ
@@ -13,7 +13,7 @@ import java.util.UUID;
 public class OffhandTriggerTracker {
 
     // プレイヤーUUIDごとのオフハンドトリガー状態を保持するマップ
-    private static final Map<UUID, Boolean> TRIGGER_MAP = new HashMap<>();
+    private static final Map<UUID, Boolean> TRIGGER_MAP = new ConcurrentHashMap<>();
 
     /**
      * 指定プレイヤーのオフハンドトリガー状態を設定する

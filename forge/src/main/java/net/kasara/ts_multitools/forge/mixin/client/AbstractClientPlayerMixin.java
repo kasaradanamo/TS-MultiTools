@@ -1,6 +1,7 @@
 package net.kasara.ts_multitools.forge.mixin.client;
 
 import net.kasara.ts_multitools.item.ModItemsCommon;
+import net.kasara.ts_multitools.item.SlimeItem;
 import net.minecraft.client.player.AbstractClientPlayer;
 import net.minecraft.world.item.ItemStack;
 import org.spongepowered.asm.mixin.Mixin;
@@ -23,10 +24,10 @@ public class AbstractClientPlayerMixin {
         AbstractClientPlayer player = (AbstractClientPlayer) (Object) this;
         ItemStack stack = player.getUseItem();
 
-        if (player.isUsingItem() && stack.is(ModItemsCommon.SLIME)) {
+        if (player.isUsingItem() && stack.getItem() == ModItemsCommon.SLIME) {
             float originalFov = cir.getReturnValue();
             // 弓の補正と同じ式を適用
-            float scale = Math.min(player.getTicksUsingItem() / 20.0F, 1.0F);
+            float scale = Math.min(player.getTicksUsingItem() / SlimeItem.getDrawTicks(stack), 1.0F);
             float modifiedFov = originalFov * (1.0F - (scale * scale) * 0.15F);
             cir.setReturnValue(modifiedFov);
         }

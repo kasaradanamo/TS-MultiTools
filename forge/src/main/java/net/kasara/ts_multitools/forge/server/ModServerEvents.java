@@ -2,15 +2,14 @@ package net.kasara.ts_multitools.forge.server;
 
 import net.kasara.tokorotenslime.api.TokorotenSlimeAPI;
 import net.kasara.ts_multitools.TSMultiToolsCommon;
-import net.kasara.ts_multitools.item.ModItemsCommon;
+import net.kasara.ts_multitools.item.SlimeItem;
 import net.kasara.ts_multitools.network.packet.s2c.SlimeUseCountS2CPacket;
 import net.kasara.ts_multitools.server.ModServerEventsCommon;
 import net.kasara.ts_multitools.server.SlimeUseCountManager;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.entity.player.Player;
-import net.minecraft.world.item.ItemStack;
 import net.minecraftforge.common.MinecraftForge;
-import net.minecraftforge.event.AnvilUpdateEvent;
+import net.minecraftforge.event.ItemAttributeModifierEvent;
 import net.minecraftforge.event.TickEvent;
 import net.minecraftforge.event.entity.player.AttackEntityEvent;
 import net.minecraftforge.event.entity.player.PlayerEvent;
@@ -62,6 +61,15 @@ public class ModServerEvents {
         if (canHarvest != null) event.setCanHarvest(canHarvest);
     }
 
+    // 合体で取り込んだ攻撃力・攻撃速度を反映する
+    @SubscribeEvent
+    public static void onItemAttributeModifier(ItemAttributeModifierEvent event) {
+        SlimeItem.getFusedModifiers(event.getItemStack(), event.getSlotType()).forEach((attribute, modifier) -> {
+            event.removeModifier(attribute, modifier);
+            event.addModifier(attribute, modifier);
+        });
+    }
+
     // プレイヤーがワールドに入った時のイベント
     @SubscribeEvent
     public static void onPlayerJoin(PlayerEvent.PlayerLoggedInEvent event) {
@@ -75,15 +83,5 @@ public class ModServerEvents {
     @SubscribeEvent
     public static void onClone(PlayerEvent.Clone event) {
         SlimeUseCountManager.copyFrom(event.getOriginal(), event.getEntity());
-    }
-
-    // 金床使用時のイベント
-    @SubscribeEvent
-    public static void onAnvilUpdate(AnvilUpdateEvent event) {
-        boolean hasBlacklisted = ModServerEventsCommon.hasBlacklistedAnvilEnchant(event.getPlayer(), event.getLeft(), event.getRight());
-
-        if (hasBlacklisted) {
-            event.setOutput(ItemStack.EMPTY);
-        }
     }
 }

@@ -1,6 +1,7 @@
 package net.kasara.ts_multitools.fabric.mixin;
 
 import net.kasara.ts_multitools.item.SlimeItem;
+import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 import org.spongepowered.asm.mixin.Mixin;
@@ -25,7 +26,7 @@ public abstract class ItemStackMixin {
             at = @At("HEAD"),
             cancellable = true
     )
-    private <T extends net.minecraft.world.entity.LivingEntity> void ts_multitools$preventSlimeDurability(
+    private <T extends LivingEntity> void ts_multitools$preventSlimeDurability(
             int amount, T entity, Consumer<T> onBroken, CallbackInfo ci) {
         if (getItem() instanceof SlimeItem) {
             ci.cancel();

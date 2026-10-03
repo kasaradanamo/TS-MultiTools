@@ -3,6 +3,7 @@ package net.kasara.ts_multitools.fabric.network;
 import net.fabricmc.fabric.api.networking.v1.PacketByteBufs;
 import net.fabricmc.fabric.api.networking.v1.ServerPlayNetworking;
 import net.kasara.tokorotenslime.api.TokorotenSlimeAPI;
+import net.kasara.ts_multitools.fabric.client.network.ClientModPackets;
 import net.kasara.ts_multitools.TSMultiToolsCommon;
 import net.kasara.ts_multitools.network.ModPacketsCommon;
 import net.kasara.ts_multitools.network.packet.c2s.SetSlimeUuidC2SPacket;
@@ -58,6 +59,6 @@ public class ModPackets {
 
     // クライアント側からのsendToServer()はfabricモジュールのクライアント専用クラス(ClientModPackets)が担当する
     private static void sendToServer(Object message) {
-        net.kasara.ts_multitools.fabric.client.network.ClientModPackets.send(message);
+        ClientModPackets.send(message);
     }
 }

@@ -11,6 +11,7 @@ import net.kasara.ts_multitools.fabric.client.ModClientEvents;
 import net.kasara.ts_multitools.fabric.client.network.ClientModPackets;
 import net.kasara.ts_multitools.fabric.entity.ModEntities;
 import net.kasara.ts_multitools.fabric.item.ModItems;
+import net.kasara.ts_multitools.item.SlimeItem;
 import net.fabricmc.fabric.api.client.rendering.v1.EntityRendererRegistry;
 import net.minecraft.client.renderer.item.ItemProperties;
 import net.minecraft.resources.ResourceLocation;
@@ -39,7 +40,7 @@ public class TSMultiToolsClient implements ClientModInitializer {
                 (stack, level, entity, seed) -> entity != null && entity.isUsingItem() && entity.getUseItem() == stack ? 1.0F : 0.0F);
         ItemProperties.register(ModItems.SLIME, new ResourceLocation("pull"),
                 (stack, level, entity, seed) -> entity == null || entity.getUseItem() != stack ? 0.0F
-                        : (float) (stack.getUseDuration() - entity.getUseItemRemainingTicks()) / 20.0F);
+                        : (stack.getUseDuration() - entity.getUseItemRemainingTicks()) / SlimeItem.getDrawTicks(stack));
 
         // 登録完了ログを出力
         TSMultiToolsCommon.LOGGER.info("Registering addon Mod Key Mappings/Renderers for " + TokorotenSlimeAPI.getModId() + " (from " + TSMultiToolsCommon.MOD_ID + ")");

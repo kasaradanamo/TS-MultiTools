@@ -4,9 +4,9 @@ import net.kasara.ts_multitools.constant.SlimeState;
 import net.kasara.ts_multitools.data.SlimeItemData;
 import net.kasara.ts_multitools.network.packet.c2s.SlimeStateC2SPacket;
 import net.kasara.ts_multitools.server.ToolRightClickHandler;
+import net.kasara.ts_multitools.util.ModTags;
 import net.minecraft.client.Minecraft;
 import net.minecraft.core.BlockPos;
-import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.tags.BlockTags;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.entity.player.Player;
@@ -100,8 +100,10 @@ public class SlimeStateClientHandler {
             lastSentOff.remove(uuid);
         }
 
-        // 実際にstateを反映
-        SlimeItemData.setState(stack, state);
+        // 実際にstateを反映（変わった時だけ）
+        if (!state.equals(SlimeItemData.getState(stack))) {
+            SlimeItemData.setState(stack, state);
+        }
 
         // 前回送信したstateと違う場合だけ更新
         if (stack == mainHand && !state.equals(lastSentMain.get(uuid))) {
@@ -118,7 +120,7 @@ public class SlimeStateClientHandler {
      */
     private static String getStateFromBlock(BlockState blockState) {
         if (blockState.is(BlockTags.MINEABLE_WITH_PICKAXE) ||
-                BuiltInRegistries.BLOCK.getKey(blockState.getBlock()).getPath().contains("glass")) return SlimeState.PICKAXE;
+                blockState.is(ModTags.Blocks.GLASS)) return SlimeState.PICKAXE;
         else if (blockState.is(BlockTags.MINEABLE_WITH_AXE)) return SlimeState.AXE;
         else if (blockState.is(BlockTags.MINEABLE_WITH_SHOVEL)) return SlimeState.SHOVEL;
         else if (blockState.is(BlockTags.MINEABLE_WITH_HOE)) return SlimeState.HOE;

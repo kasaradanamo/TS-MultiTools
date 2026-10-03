@@ -21,6 +21,7 @@ import net.minecraft.world.item.enchantment.EnchantmentHelper;
 import net.minecraft.world.item.enchantment.Enchantments;
 import net.minecraft.world.level.Level;
 
+import java.util.HashMap;
 import java.util.Map;
 
 /**
@@ -95,7 +96,7 @@ public class SlimeRecipe extends CustomRecipe {
         boolean hasSilkTouch = false;
         boolean hasFortune = false;
 
-        Map<Enchantment, Integer> resultEnchantments = new java.util.HashMap<>();
+        Map<Enchantment, Integer> resultEnchantments = new HashMap<>();
 
         // スロット全部確認
         for (int i = 0; i < input.getContainerSize(); i++) {

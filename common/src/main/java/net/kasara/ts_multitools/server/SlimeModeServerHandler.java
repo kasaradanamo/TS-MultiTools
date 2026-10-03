@@ -9,6 +9,7 @@ import net.minecraft.ChatFormatting;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.Style;
 import net.minecraft.server.level.ServerPlayer;
+import net.minecraft.world.entity.player.Inventory;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.enchantment.Enchantment;
 import net.minecraft.world.item.enchantment.EnchantmentHelper;
@@ -105,7 +106,7 @@ public class SlimeModeServerHandler {
      * @param player    対象プレイヤー
      */
     public static void updateMiningModeForInventory(UUID stackUuid, String mode, ServerPlayer player) {
-        net.minecraft.world.entity.player.Inventory inventory = player.getInventory();
+        Inventory inventory = player.getInventory();
         for (int i = 0; i < inventory.getContainerSize(); i++) {
             ItemStack stack = inventory.getItem(i);
             if (stack.isEmpty() || stack.getItem() != ModItemsCommon.SLIME) continue;

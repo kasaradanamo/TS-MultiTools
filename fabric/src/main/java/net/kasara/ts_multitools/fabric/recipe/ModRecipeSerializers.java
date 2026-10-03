@@ -3,6 +3,7 @@ package net.kasara.ts_multitools.fabric.recipe;
 import net.kasara.tokorotenslime.TokorotenSlimeCommon;
 import net.kasara.tokorotenslime.api.TokorotenSlimeAPI;
 import net.kasara.ts_multitools.TSMultiToolsCommon;
+import net.kasara.ts_multitools.recipe.SlimeFusionRecipe;
 import net.kasara.ts_multitools.recipe.SlimeRecipe;
 import net.minecraft.core.Registry;
 import net.minecraft.core.registries.BuiltInRegistries;
@@ -16,6 +17,13 @@ public class ModRecipeSerializers {
             BuiltInRegistries.RECIPE_SERIALIZER,
             new ResourceLocation(TokorotenSlimeCommon.MOD_ID, "crafting_slime"),
             SlimeRecipe.INSTANCE
+    );
+
+    // スライム合体のレシピシリアライザー
+    public static final RecipeSerializer<SlimeFusionRecipe> SLIME_FUSION = Registry.register(
+            BuiltInRegistries.RECIPE_SERIALIZER,
+            new ResourceLocation(TokorotenSlimeCommon.MOD_ID, "slime_fusion"),
+            SlimeFusionRecipe.SERIALIZER
     );
 
     public static void register() {

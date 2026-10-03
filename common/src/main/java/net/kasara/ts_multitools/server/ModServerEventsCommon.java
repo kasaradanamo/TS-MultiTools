@@ -4,15 +4,12 @@ import com.google.common.collect.Multimap;
 import net.kasara.ts_multitools.constant.SlimeState;
 import net.kasara.ts_multitools.data.SlimeItemData;
 import net.kasara.ts_multitools.item.ModItemsCommon;
-import net.kasara.ts_multitools.item.SlimeEnchantmentRules;
 import net.minecraft.world.entity.EquipmentSlot;
 import net.minecraft.world.entity.ai.attributes.Attribute;
 import net.minecraft.world.entity.ai.attributes.AttributeInstance;
 import net.minecraft.world.entity.ai.attributes.AttributeModifier;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.ItemStack;
-import net.minecraft.world.item.enchantment.Enchantment;
-import net.minecraft.world.item.enchantment.EnchantmentHelper;
 import net.minecraft.world.level.block.state.BlockState;
 
 import java.util.Map;
@@ -92,18 +89,6 @@ public final class ModServerEventsCommon {
     public static boolean shouldSuppressSweepAttack(Player player) {
         ItemStack stack = player.getMainHandItem();
         return stack.getItem() == ModItemsCommon.SLIME && player.totalExperience < 1;
-    }
-
-    /**
-     * 金床使用時、SlimeItemに対してブラックリストのエンチャントが付いたアイテムを合成しようとしていないか判定。
-     *
-     * @return ブラックリストのエンチャントが右スロットのアイテムに付いていればtrue
-     */
-    public static boolean hasBlacklistedAnvilEnchant(Player player, ItemStack left, ItemStack right) {
-        if (player.isCreative() || left.getItem() != ModItemsCommon.SLIME) return false;
-
-        Map<Enchantment, Integer> enchantments = EnchantmentHelper.getEnchantments(right);
-        return enchantments.keySet().stream().anyMatch(SlimeEnchantmentRules::isBlacklisted);
     }
 
     private ModServerEventsCommon() {}

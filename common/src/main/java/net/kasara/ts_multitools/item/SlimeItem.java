@@ -3,6 +3,7 @@ package net.kasara.ts_multitools.item;
 import com.google.common.collect.ImmutableMultimap;
 import com.google.common.collect.Multimap;
 import net.kasara.ts_multitools.client.SlimeStateClientHandler;
+import net.kasara.ts_multitools.client.data.SlimeUseCountClientCache;
 import net.kasara.ts_multitools.component.SlimeModeComponent;
 import net.kasara.ts_multitools.constant.SlimeMode;
 import net.kasara.ts_multitools.data.SlimeItemData;
@@ -13,10 +14,12 @@ import net.kasara.ts_multitools.server.data.OffhandTriggerTracker;
 import net.kasara.ts_multitools.util.ModTags;
 import net.kasara.ts_multitools.util.MultiToolUtil;
 import net.minecraft.ChatFormatting;
+import net.minecraft.core.BlockPos;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.Style;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.sounds.SoundEvents;
+import net.minecraft.sounds.SoundSource;
 import net.minecraft.stats.Stats;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.InteractionResult;
@@ -30,14 +33,16 @@ import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.BowItem;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Rarity;
+import net.minecraft.world.item.Tier;
 import net.minecraft.world.item.TooltipFlag;
 import net.minecraft.world.item.context.UseOnContext;
-import net.minecraft.world.item.enchantment.Enchantment;
+import net.minecraft.world.item.enchantment.EnchantmentHelper;
+import net.minecraft.world.item.enchantment.Enchantments;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.state.BlockState;
 
 import java.util.List;
-import java.util.function.Consumer;
+import java.util.UUID;
 
 import static net.kasara.ts_multitools.util.MultiToolUtil.applyDurability;
 
@@ -46,10 +51,18 @@ import static net.kasara.ts_multitools.util.MultiToolUtil.applyDurability;
  */
 public class SlimeItem extends BowItem {
 
-    protected final net.minecraft.world.item.Tier tier;
+    // 攻撃力・攻撃速度の補正のID
+    public static final UUID ATTACK_DAMAGE_ID = BASE_ATTACK_DAMAGE_UUID;
+    public static final UUID ATTACK_SPEED_ID = BASE_ATTACK_SPEED_UUID;
+
+    // 弓の引き絞りの範囲（最も遅い＝合体前、最も速い＝More Bowsのダイヤの弓）
+    private static final double SLOWEST_DRAW_TICKS = 20.0;
+    private static final double FASTEST_DRAW_TICKS = 6.0;
+
+    protected final Tier tier;
     private final Multimap<Attribute, AttributeModifier> attributeModifiers;
 
-    public SlimeItem(net.minecraft.world.item.Tier tier, Properties pros) {
+    public SlimeItem(Tier tier, Properties pros) {
         super(applyDurability(pros
                 .stacksTo(1)        // スタック不可
                 .fireResistant()    // 耐火
@@ -71,7 +84,7 @@ public class SlimeItem extends BowItem {
     public ItemStack getDefaultInstance() {
         ItemStack stack = super.getDefaultInstance();
         if (!SlimeItemData.hasUuid(stack)) {
-            SlimeItemData.setUuid(stack, java.util.UUID.randomUUID());
+            SlimeItemData.setUuid(stack, UUID.randomUUID());
         }
         return stack;
     }
@@ -166,8 +179,8 @@ public class SlimeItem extends BowItem {
         if (!(entity instanceof Player player)) return;
 
         // 引いた時間から弓のチャージ進行度を計算
-        int useTime = this.getUseDuration(itemStack) - remainingTime;
-        float pullProgress = getPowerForTime(useTime);
+        float charge = (this.getUseDuration(itemStack) - remainingTime) / getDrawTicks(itemStack);
+        float pullProgress = Math.min((charge * charge + charge * 2.0F) / 3.0F, 1.0F);
         if (pullProgress < 0.1F) return;   // 引き不足なら発射しない
 
         if (!level.isClientSide()) {
@@ -176,20 +189,21 @@ public class SlimeItem extends BowItem {
             if (pullProgress == 1.0F) {
                 arrow.setCritArrow(true);
             }
+            arrow.setBaseDamage(arrow.getBaseDamage() * getArrowDamageMultiplier(itemStack));
 
             // 弓エンチャント(射撃ダメージ増加/ノックバック増加/フレイム)を矢に反映
-            int power = net.minecraft.world.item.enchantment.EnchantmentHelper.getItemEnchantmentLevel(
-                    net.minecraft.world.item.enchantment.Enchantments.POWER_ARROWS, itemStack);
+            int power = EnchantmentHelper.getItemEnchantmentLevel(
+                    Enchantments.POWER_ARROWS, itemStack);
             if (power > 0) {
                 arrow.setBaseDamage(arrow.getBaseDamage() + power * 0.5D + 0.5D);
             }
-            int punch = net.minecraft.world.item.enchantment.EnchantmentHelper.getItemEnchantmentLevel(
-                    net.minecraft.world.item.enchantment.Enchantments.PUNCH_ARROWS, itemStack);
+            int punch = EnchantmentHelper.getItemEnchantmentLevel(
+                    Enchantments.PUNCH_ARROWS, itemStack);
             if (punch > 0) {
                 arrow.setKnockback(punch);
             }
-            if (net.minecraft.world.item.enchantment.EnchantmentHelper.getItemEnchantmentLevel(
-                    net.minecraft.world.item.enchantment.Enchantments.FLAMING_ARROWS, itemStack) > 0) {
+            if (EnchantmentHelper.getItemEnchantmentLevel(
+                    Enchantments.FLAMING_ARROWS, itemStack) > 0) {
                 arrow.setSecondsOnFire(100);
             }
 
@@ -198,7 +212,7 @@ public class SlimeItem extends BowItem {
 
         // 発射音を再生
         level.playSound(null, player.getX(), player.getY(), player.getZ(),
-                net.minecraft.sounds.SoundEvents.ARROW_SHOOT, net.minecraft.sounds.SoundSource.PLAYERS,
+                SoundEvents.ARROW_SHOOT, SoundSource.PLAYERS,
                 1.0F, 1.0F / (level.getRandom().nextFloat() * 0.4F + 1.2F) + pullProgress * 0.5F);
 
         SlimeUseCountManager.increment(player);        // 使用回数加算
@@ -210,7 +224,7 @@ public class SlimeItem extends BowItem {
      * ブロック破壊後の処理
      */
     @Override
-    public boolean mineBlock(ItemStack itemStack, Level level, BlockState state, net.minecraft.core.BlockPos pos, LivingEntity owner) {
+    public boolean mineBlock(ItemStack itemStack, Level level, BlockState state, BlockPos pos, LivingEntity owner) {
         if (!(owner instanceof Player player)) return false;
         if (player.totalExperience < 1) return true; // XP不足時は素手扱いなので使用回数/XP消費に影響しない
         if (state.getDestroySpeed(level, pos) != 0.0F) { // 松明等の瞬間破壊ブロックは耐久同様XPも消費しない
@@ -239,11 +253,69 @@ public class SlimeItem extends BowItem {
      */
     @Override
     public float getDestroySpeed(ItemStack itemStack, BlockState state) {
-        ResourceLocation id = BuiltInRegistries.BLOCK.getKey(state.getBlock());
-        if (id.getPath().contains("glass")) {
+        if (state.is(ModTags.Blocks.GLASS)) {
             return 1.5F;    // ガラス系は少し早めに
         }
+        if (state.is(ModTags.Blocks.SLIME_MINEABLE)) {
+            return getMiningSpeed(itemStack);
+        }
         return MultiToolUtil.getDestroySpeed(tier, ModTags.Blocks.SLIME_MINEABLE, state);
+    }
+
+    /**
+     * 合体で取り込んだ攻撃力・攻撃速度の補正。ローダーの属性イベントで、同じIDの補正と置き換える
+     */
+    public static Multimap<Attribute, AttributeModifier> getFusedModifiers(ItemStack stack, EquipmentSlot slot) {
+        if (slot != EquipmentSlot.MAINHAND || stack.getItem() != ModItemsCommon.SLIME) return ImmutableMultimap.of();
+
+        ImmutableMultimap.Builder<Attribute, AttributeModifier> builder = ImmutableMultimap.builder();
+
+        SlimeItemData.getAttackDamage(stack).ifPresent(amount -> builder.put(Attributes.ATTACK_DAMAGE,
+                new AttributeModifier(ATTACK_DAMAGE_ID, "Tool modifier", amount, AttributeModifier.Operation.ADDITION)));
+        SlimeItemData.getAttackSpeed(stack).ifPresent(amount -> builder.put(Attributes.ATTACK_SPEED,
+                new AttributeModifier(ATTACK_SPEED_ID, "Tool modifier", amount, AttributeModifier.Operation.ADDITION)));
+        return builder.build();
+    }
+
+    /**
+     * 採掘できるブロックでの採掘速度（合体で取り込んだ値、無ければ素材本来の値）
+     */
+    public static float getMiningSpeed(ItemStack stack) {
+        return SlimeItemData.getMiningSpeed(stack, ((SlimeItem) stack.getItem()).tier.getSpeed());
+    }
+
+    /**
+     * 矢のダメージ倍率。剣の1発と同じく、攻撃力÷合体前の攻撃力（1倍より下げない）
+     */
+    public static double getArrowDamageMultiplier(ItemStack stack) {
+        return Math.max(ratioToBase(stack, Attributes.ATTACK_DAMAGE, ATTACK_DAMAGE_ID), 1.0);
+    }
+
+    /**
+     * 引き絞りきるまでのtick数。攻撃速度に比例して速くなる（20tick×合体前の攻撃速度÷攻撃速度、6〜20tick）
+     */
+    public static float getDrawTicks(ItemStack stack) {
+        double ratio = Math.max(ratioToBase(stack, Attributes.ATTACK_SPEED, ATTACK_SPEED_ID), 1.0);
+        return (float) Math.max(SLOWEST_DRAW_TICKS / ratio, FASTEST_DRAW_TICKS);
+    }
+
+    /**
+     * 今の値÷合体前の値。値はツールチップに出るもの（素手の値＋メインハンドの補正値）
+     */
+    private static double ratioToBase(ItemStack stack, Attribute attribute, UUID id) {
+        Multimap<Attribute, AttributeModifier> current = stack.getAttributeModifiers(EquipmentSlot.MAINHAND);
+        Multimap<Attribute, AttributeModifier> base = stack.getItem().getDefaultAttributeModifiers(EquipmentSlot.MAINHAND);
+        return attributeValue(current, attribute, id) / attributeValue(base, attribute, id);
+    }
+
+    private static double attributeValue(Multimap<Attribute, AttributeModifier> modifiers, Attribute attribute, UUID id) {
+        double value = attribute.getDefaultValue();
+        for (AttributeModifier modifier : modifiers.get(attribute)) {
+            if (modifier.getId().equals(id) && modifier.getOperation() == AttributeModifier.Operation.ADDITION) {
+                value += modifier.getAmount();
+            }
+        }
+        return value;
     }
 
     @Override
@@ -263,7 +335,7 @@ public class SlimeItem extends BowItem {
 
         // 使用回数の表示
         tooltip.add(
-                Component.translatable("tooltip.tokorotenslime.proficiency", net.kasara.ts_multitools.client.data.SlimeUseCountClientCache.getSlimeUseCount())
+                Component.translatable("tooltip.tokorotenslime.proficiency", SlimeUseCountClientCache.getSlimeUseCount())
         );
 
         // モード情報の表示
