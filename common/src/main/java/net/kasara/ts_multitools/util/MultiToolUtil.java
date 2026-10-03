@@ -58,9 +58,9 @@ public class MultiToolUtil {
                         // 蜘蛛の巣破壊できるようにする
                         Tool.Rule.minesAndDrops(HolderSet.direct(Blocks.COBWEB.builtInRegistryHolder()), 15.0F)
                 ),
-                1.0F, // 範囲倍率（常に1.0）
+                1.0F, // 採掘対象外のブロックの採掘速度
                 1,      // 消費耐久値
-                true    // 破壊可能ブロック以外も破壊できるか
+                true    // クリエイティブでブロックを壊せるか
         );
 
         // 武器コンポーネント

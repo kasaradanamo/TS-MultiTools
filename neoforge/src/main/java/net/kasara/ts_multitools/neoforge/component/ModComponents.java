@@ -5,6 +5,7 @@ import net.kasara.tokorotenslime.api.TokorotenSlimeAPI;
 import net.kasara.ts_multitools.component.MiningEnchantLevelComponent;
 import net.kasara.ts_multitools.component.SlimeModeComponent;
 import net.kasara.ts_multitools.neoforge.TSMultiTools;
+import net.minecraft.core.UUIDUtil;
 import net.minecraft.core.component.DataComponentType;
 import net.minecraft.core.registries.Registries;
 import net.neoforged.bus.api.IEventBus;
@@ -16,7 +17,7 @@ import java.util.UUID;
 public class ModComponents {
 
     public static final DeferredRegister.DataComponents COMPONENTS =
-            DeferredRegister.createDataComponents(Registries.DATA_COMPONENT_TYPE,  TSMultiTools.MOD_ID);
+            DeferredRegister.createDataComponents(Registries.DATA_COMPONENT_TYPE, TSMultiTools.MOD_ID);
 
     // 使用モード / 採掘モードを記録するコンポーネント
     public static final DeferredHolder<DataComponentType<?>, DataComponentType<SlimeModeComponent>> SLIME_MODE =
@@ -32,7 +33,7 @@ public class ModComponents {
 
     // スライムごとの一意な識別子（UUID）を保持するコンポーネント
     public static final DeferredHolder<DataComponentType<?>, DataComponentType<UUID>> SLIME_UUID =
-            COMPONENTS.registerComponentType("slime_uuid", builder -> builder.persistent(Codec.STRING.xmap(UUID::fromString, UUID::toString)));
+            COMPONENTS.registerComponentType("slime_uuid", builder -> builder.persistent(UUIDUtil.STRING_CODEC));
 
     /**
      * コンポーネントの登録処理を初期化時に呼び出す

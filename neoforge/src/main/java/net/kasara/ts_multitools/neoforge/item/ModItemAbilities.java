@@ -17,6 +17,7 @@ final class ModItemAbilities {
         MULTITOOL.addAll(ItemAbilities.DEFAULT_AXE_ACTIONS);
         MULTITOOL.addAll(ItemAbilities.DEFAULT_SHOVEL_ACTIONS);
         MULTITOOL.addAll(ItemAbilities.DEFAULT_HOE_ACTIONS);
+        MULTITOOL.add(ItemAbilities.SWORD_SWEEP);
     }
 
     private ModItemAbilities() {}

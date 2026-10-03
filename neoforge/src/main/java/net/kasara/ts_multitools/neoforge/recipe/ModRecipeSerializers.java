@@ -2,6 +2,7 @@ package net.kasara.ts_multitools.neoforge.recipe;
 
 import net.kasara.tokorotenslime.api.TokorotenSlimeAPI;
 import net.kasara.ts_multitools.neoforge.TSMultiTools;
+import net.kasara.ts_multitools.recipe.SlimeFusionRecipe;
 import net.kasara.ts_multitools.recipe.SlimeRecipe;
 import net.minecraft.core.registries.Registries;
 import net.minecraft.world.item.crafting.RecipeSerializer;
@@ -15,8 +16,12 @@ public class ModRecipeSerializers {
             DeferredRegister.create(Registries.RECIPE_SERIALIZER, TokorotenSlimeAPI.getModId());
 
     // スライムのレシピシリアライザー
-    public static DeferredHolder<RecipeSerializer<?>, RecipeSerializer<SlimeRecipe>> CRAFTING_SLIME =
+    public static final DeferredHolder<RecipeSerializer<?>, RecipeSerializer<SlimeRecipe>> CRAFTING_SLIME =
             SERIALIZERS.register("crafting_slime", () -> SlimeRecipe.INSTANCE);
+
+    // スライム合体のレシピシリアライザー
+    public static final DeferredHolder<RecipeSerializer<?>, RecipeSerializer<SlimeFusionRecipe>> SLIME_FUSION =
+            SERIALIZERS.register("slime_fusion", () -> SlimeFusionRecipe.SERIALIZER);
 
     public static void register(IEventBus modEventBus) {
         SERIALIZERS.register(modEventBus);

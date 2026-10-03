@@ -6,7 +6,6 @@ import net.kasara.tokorotenslime.api.TokorotenSlimeAPI;
 import net.kasara.tokorotenslime.api.TokorotenSlimeClientAPI;
 import net.kasara.ts_multitools.fabric.TSMultiTools;
 import net.minecraft.client.KeyMapping;
-import org.lwjgl.glfw.GLFW;
 
 public class ModKeyMappings {
 
@@ -14,13 +13,13 @@ public class ModKeyMappings {
     public static KeyMapping MODE_TOGGLE;
 
     /**
-     * GLFWのキーコードとキー名を指定して登録
+     * キーコードとキー名を指定して登録
      */
     public static void register() {
         MODE_TOGGLE = KeyMappingHelper.registerKeyMapping(new KeyMapping(
                 "key.tokorotenslime.mode_toggle",   // キー名（翻訳用）
                 InputConstants.Type.KEYSYM,               // キーの種類
-                GLFW.GLFW_KEY_X,                          // デフォルトのキー
+                InputConstants.KEY_X,                     // デフォルトのキー
                 TokorotenSlimeClientAPI.getKeyMappingCategory() // カテゴリ名（オプション画面で表示されるグループ）
         ));
 

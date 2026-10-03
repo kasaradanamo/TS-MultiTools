@@ -10,6 +10,7 @@
   "item.tokorotenslime.slime_sword_icon": "スライムソードアイコン",
 
   "tooltip.tokorotenslime.proficiency": "練度: %s",
+  "tooltip.tokorotenslime.mining_speed": "採掘速度",
   "tooltip.tokorotenslime.use_mode": "モード: %s",
   "tooltip.tokorotenslime.mining_mode": "採掘モード: %s",
 

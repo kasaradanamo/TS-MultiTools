@@ -5,6 +5,7 @@ import net.fabricmc.fabric.api.client.networking.v1.ClientPlayNetworking;
 import net.fabricmc.fabric.api.client.rendering.v1.EntityRendererRegistry;
 
 import net.kasara.tokorotenslime.api.TokorotenSlimeAPI;
+import net.kasara.ts_multitools.client.SlimePullProperty;
 import net.kasara.ts_multitools.client.option.ModKeyMappingsCommon;
 import net.kasara.ts_multitools.client.render.block.PedestalRenderRegistry;
 import net.kasara.ts_multitools.client.render.entity.SlimeArrowRenderer;
@@ -12,6 +13,7 @@ import net.kasara.ts_multitools.network.ModPacketsCommon;
 import net.kasara.ts_multitools.fabric.client.ModClientEvents;
 import net.kasara.ts_multitools.fabric.client.option.ModKeyMappings;
 import net.kasara.ts_multitools.fabric.entity.ModEntities;
+import net.kasara.ts_multitools.fabric.mixin.client.RangeSelectItemModelPropertiesAccessor;
 import net.kasara.ts_multitools.fabric.network.ModPackets;
 
 public class TSMultiToolsClient implements ClientModInitializer {
@@ -36,6 +38,9 @@ public class TSMultiToolsClient implements ClientModInitializer {
 
         // 台座描画登録
         PedestalRenderRegistry.register();
+
+        // スライムの弓の見た目で使う引き絞りの進み具合を登録
+        RangeSelectItemModelPropertiesAccessor.ts_multitools$getIdMapper().put(SlimePullProperty.ID, SlimePullProperty.MAP_CODEC);
     }
 
     private void registerRenderers() {

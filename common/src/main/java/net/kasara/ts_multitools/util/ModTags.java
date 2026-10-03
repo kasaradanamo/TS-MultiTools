@@ -26,6 +26,9 @@ public class ModTags {
         // マルチツールで採掘可能なブロック
         public static final TagKey<Block> MULTITOOL_MINEABLE = createTag("mineable/multitool");
 
+        // ガラス系ブロック
+        public static final TagKey<Block> GLASS = createTag("glass");
+
         private static TagKey<Block> createTag(String name) {
             return TagKey.create(Registries.BLOCK, Identifier.fromNamespaceAndPath(TokorotenSlimeAPI.getModId(), name)
             );

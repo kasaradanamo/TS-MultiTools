@@ -9,13 +9,11 @@ import net.kasara.ts_multitools.client.option.ModKeyMappingsCommon;
 import net.minecraft.client.Minecraft;
 import net.minecraft.core.Holder;
 import net.minecraft.core.component.DataComponents;
-import net.minecraft.core.registries.Registries;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.enchantment.Enchantment;
 import net.minecraft.world.item.enchantment.Enchantments;
 import net.minecraft.world.item.enchantment.ItemEnchantments;
-import net.minecraft.world.level.Level;
-import org.lwjgl.glfw.GLFW;
+import com.mojang.blaze3d.platform.InputConstants;
 
 import java.util.UUID;
 
@@ -42,8 +40,7 @@ public class SlimeModeClientHandler {
 
             UUID stackUuid = stack.get(ModComponentsCommon.SLIME_UUID);
 
-            boolean ctrlPressed = GLFW.glfwGetKey(minecraft.getWindow().handle(),
-                    GLFW.GLFW_KEY_LEFT_CONTROL) == GLFW.GLFW_PRESS;
+            boolean ctrlPressed = InputConstants.isKeyDown(minecraft.getWindow(), InputConstants.KEY_LCONTROL);
 
             ToggleSlimeModeC2SPacket.send(stackUuid, ctrlPressed ? SlimeMode.Type.USE : SlimeMode.Type.MINING);
 
@@ -70,19 +67,15 @@ public class SlimeModeClientHandler {
      * @return "fortune" | "silk_touch" | "default"
      */
     private static String getMiningModeFromEnchantments(ItemStack stack) {
-        Level level = Minecraft.getInstance().level;
-
         ItemEnchantments enchants = stack.get(DataComponents.ENCHANTMENTS);
         if (enchants == null || enchants.isEmpty()) return SlimeMode.MiningMode.DEFAULT;
 
-        Holder<Enchantment> fortuneHolder = level.registryAccess().lookupOrThrow(Registries.ENCHANTMENT).getOrThrow(Enchantments.FORTUNE);
-        Holder<Enchantment> silkTouchHolder = level.registryAccess().lookupOrThrow(Registries.ENCHANTMENT).getOrThrow(Enchantments.SILK_TOUCH);
-
-        boolean hasFortune = enchants.getLevel(fortuneHolder) > 0;
-        boolean hasSilkTouch = enchants.getLevel(silkTouchHolder) > 0;
-
-        if (hasFortune) return SlimeMode.MiningMode.FORTUNE;
-        if (hasSilkTouch) return SlimeMode.MiningMode.SILK_TOUCH;
-        return "default";
+        // 幸運を優先
+        boolean hasSilkTouch = false;
+        for (Holder<Enchantment> holder : enchants.keySet()) {
+            if (holder.is(Enchantments.FORTUNE)) return SlimeMode.MiningMode.FORTUNE;
+            if (holder.is(Enchantments.SILK_TOUCH)) hasSilkTouch = true;
+        }
+        return hasSilkTouch ? SlimeMode.MiningMode.SILK_TOUCH : SlimeMode.MiningMode.DEFAULT;
     }
 }

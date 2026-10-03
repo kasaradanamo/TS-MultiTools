@@ -1,6 +1,7 @@
 package net.kasara.ts_multitools.neoforge;
 
 import net.kasara.tokorotenslime.api.TokorotenSlimeAPI;
+import net.kasara.ts_multitools.client.SlimePullProperty;
 import net.kasara.ts_multitools.client.option.ModKeyMappingsCommon;
 import net.kasara.ts_multitools.client.render.block.PedestalRenderRegistry;
 import net.kasara.ts_multitools.client.render.entity.SlimeArrowRenderer;
@@ -16,6 +17,7 @@ import net.neoforged.fml.common.Mod;
 import net.neoforged.fml.event.lifecycle.FMLClientSetupEvent;
 import net.neoforged.neoforge.client.event.EntityRenderersEvent;
 import net.neoforged.neoforge.client.event.RegisterKeyMappingsEvent;
+import net.neoforged.neoforge.client.event.RegisterRangeSelectItemModelPropertyEvent;
 
 @Mod(value = TSMultiTools.MOD_ID, dist = Dist.CLIENT)
 @EventBusSubscriber(modid = TSMultiTools.MOD_ID, value = Dist.CLIENT)
@@ -37,6 +39,13 @@ public class TSMultiToolsClient {
 
         // レンダリング登録
         modEventBus.addListener(this::registerRenderers);
+
+        // スライムの弓の見た目で使う引き絞りの進み具合を登録
+        modEventBus.addListener(this::registerItemModelProperties);
+    }
+
+    private void registerItemModelProperties(RegisterRangeSelectItemModelPropertyEvent event) {
+        event.register(SlimePullProperty.ID, SlimePullProperty.MAP_CODEC);
     }
 
     private void onClientSetup(FMLClientSetupEvent event) {
