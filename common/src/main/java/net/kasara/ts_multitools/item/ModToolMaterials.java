@@ -9,8 +9,8 @@ import net.minecraft.world.item.ToolMaterial;
 public class ModToolMaterials {
 
     // スライム素材のツール素材設定
-    public static ToolMaterial SLIME = new ToolMaterial(
-            ModTags.Blocks.INCORRECT_FOR_SLIME, // 採掘可能ブロックのタグ
+    public static final ToolMaterial SLIME = new ToolMaterial(
+            ModTags.Blocks.INCORRECT_FOR_SLIME, // 採掘してもドロップしないブロックのタグ
             1,                                  // 耐久値（スライムにはないため1にしてる）
             10.0F,                              // 採掘速度
             5.0F,                               // 攻撃力ボーナス

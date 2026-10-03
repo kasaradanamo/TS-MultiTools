@@ -1,0 +1,5 @@
+{
+  "type": "tokorotenslime:slime_fusion",
+  "base": "tokorotenslime:slime",
+  "addition": "#tokorotenslime:slime_fusion_addition"
+}

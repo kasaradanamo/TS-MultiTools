@@ -103,8 +103,10 @@ public class SlimeStateClientHandler {
             lastSentOff.remove(uuid);
         }
 
-        // 実際にstateを反映
-        stack.set(ModComponentsCommon.SLIME_STATE, state);
+        // 実際にstateを反映（変わった時だけ）
+        if (!state.equals(stack.get(ModComponentsCommon.SLIME_STATE))) {
+            stack.set(ModComponentsCommon.SLIME_STATE, state);
+        }
 
         // 前回送信したstateと違う場合だけ更新
         if (stack == mainHand && !state.equals(lastSentMain.get(uuid))) {
@@ -119,7 +121,7 @@ public class SlimeStateClientHandler {
     /**
      * ブロックのタグから対応するツール種別を取得
      */
-    private  static String getStateFromBlock(BlockState blockState) {
+    private static String getStateFromBlock(BlockState blockState) {
         if (blockState.is(BlockTags.MINEABLE_WITH_PICKAXE) ||
                 blockState.is(ModTags.Blocks.GLASS)) return SlimeState.PICKAXE;
         else if (blockState.is(BlockTags.MINEABLE_WITH_AXE)) return SlimeState.AXE;

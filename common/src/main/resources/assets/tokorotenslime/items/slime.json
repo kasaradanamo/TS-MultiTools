@@ -70,8 +70,7 @@
         "type": "minecraft:model",
         "model": "tokorotenslime:item/slime_bow_pulling_0"
       },
-      "property": "minecraft:use_duration",
-      "scale": 0.05
+      "property": "ts_multitools:slime_pull"
     }
   }
 }

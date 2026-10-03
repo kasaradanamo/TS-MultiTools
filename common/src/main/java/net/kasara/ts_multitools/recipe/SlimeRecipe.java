@@ -15,7 +15,12 @@ import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.ItemStackTemplate;
 import net.minecraft.world.item.Items;
-import net.minecraft.world.item.crafting.*;
+import net.minecraft.world.item.crafting.CraftingBookCategory;
+import net.minecraft.world.item.crafting.CraftingInput;
+import net.minecraft.world.item.crafting.CustomRecipe;
+import net.minecraft.world.item.crafting.Ingredient;
+import net.minecraft.world.item.crafting.PlacementInfo;
+import net.minecraft.world.item.crafting.RecipeSerializer;
 import net.minecraft.world.item.crafting.display.RecipeDisplay;
 import net.minecraft.world.item.crafting.display.ShapelessCraftingRecipeDisplay;
 import net.minecraft.world.item.crafting.display.SlotDisplay;
@@ -94,8 +99,7 @@ public class SlimeRecipe extends CustomRecipe {
         ItemEnchantments.Mutable mutable = new ItemEnchantments.Mutable(ItemEnchantments.EMPTY);
 
         // マイニングエンチャントのコンポーネントを取得
-        MiningEnchantLevelComponent comp = result.get(ModComponentsCommon.MINING_ENCHANT_LEVEL);
-        if (comp == null) return ItemStack.EMPTY;
+        MiningEnchantLevelComponent comp = result.getOrDefault(ModComponentsCommon.MINING_ENCHANT_LEVEL, MiningEnchantLevelComponent.DEFAULT);
 
         boolean hasSilkTouch = false;
         boolean hasFortune = false;

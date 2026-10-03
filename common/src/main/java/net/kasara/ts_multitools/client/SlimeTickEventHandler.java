@@ -32,7 +32,7 @@ public class SlimeTickEventHandler {
             SlimeModeClientHandler.updateSlimeEnchantment(stack, uuid);
         }
 
-        // キー入力で SlimeItem のモード切替（メインハンドのみ見るのでループの外で1回）
+        // キー入力で SlimeItem のモード切替
         SlimeModeClientHandler.handleModeToggle(client);
     }
 }

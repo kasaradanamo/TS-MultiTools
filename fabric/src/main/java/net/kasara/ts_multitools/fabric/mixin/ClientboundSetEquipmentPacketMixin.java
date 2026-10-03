@@ -27,6 +27,9 @@ public class ClientboundSetEquipmentPacketMixin {
      */
     @ModifyVariable(method = "<init>(ILjava/util/List;)V", at = @At("HEAD"), argsOnly = true)
     private static List<Pair<EquipmentSlot, ItemStack>> onConstruct(List<Pair<EquipmentSlot, ItemStack>> list) {
+        // SLIMEが入っていなければそのまま使う
+        if (!containsSlime(list)) return list;
+
         List<Pair<EquipmentSlot, ItemStack>> result = new ArrayList<>(list.size());
 
         for (Pair<EquipmentSlot, ItemStack> pair : list) {
@@ -50,5 +53,12 @@ public class ClientboundSetEquipmentPacketMixin {
         }
 
         return result;
+    }
+
+    private static boolean containsSlime(List<Pair<EquipmentSlot, ItemStack>> list) {
+        for (Pair<EquipmentSlot, ItemStack> pair : list) {
+            if (pair.getSecond().getItem() == ModItemsCommon.SLIME) return true;
+        }
+        return false;
     }
 }

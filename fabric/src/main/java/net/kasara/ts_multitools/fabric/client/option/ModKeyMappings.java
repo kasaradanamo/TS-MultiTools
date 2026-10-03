@@ -13,7 +13,7 @@ public class ModKeyMappings {
     public static KeyMapping MODE_TOGGLE;
 
     /**
-     * GLFWのキーコードとキー名を指定して登録
+     * キーコードとキー名を指定して登録
      */
     public static void register() {
         MODE_TOGGLE = KeyMappingHelper.registerKeyMapping(new KeyMapping(

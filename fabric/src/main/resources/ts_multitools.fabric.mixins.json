@@ -9,7 +9,8 @@
         "PlayerMixin"
 	],
     "client": [
-        "client.AbstractClientPlayerMixin"
+        "client.AbstractClientPlayerMixin",
+        "client.RangeSelectItemModelPropertiesAccessor"
     ],
 	"injectors": {
 		"defaultRequire": 1
